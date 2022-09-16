@@ -1,0 +1,22 @@
+{
+  "name": "teccloud-api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "nodemon --watch src --exec 'ts-node src/main.ts'",
+    "start": "ts-node src/main.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.1",
+    "sequelize": "^6.22.0",
+    "ts-node": "^10.9.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.12",
+    "@types/express": "^4.17.14",
+    "@types/node": "18.7.14",
+    "nodemon": "^2.0.20",
+    "typescript": "4.8.2"
+  }
+}
