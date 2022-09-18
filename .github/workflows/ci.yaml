@@ -1,0 +1,38 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout commit
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+          cache-dependency-path: |
+            teccloud-api/yarn.lock
+            teccloud-server/yarn.lock
+
+      - name: Build teccloud-server
+        run: |
+          cd teccloud-server
+          yarn install --frozen-lockfile
+          yarn next telemetry disable
+          yarn lint
+          yarn build
+
+      - name: Typecheck teccloud-api
+        run: |
+          cd teccloud-api
+          yarn install --frozen-lockfile
+          yarn typecheck

@@ -10,3 +10,4 @@ node_modules/
 .env.test
 .DS_Store
 teccloud.sqlite
+package-lock.json
