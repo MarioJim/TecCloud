@@ -21,17 +21,17 @@ const Files: NextPage = () => (
   <Box sx={{ display: 'flex' }}>
     <CssBaseline />
     <AppBar
-      position="fixed"
+      position='fixed'
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
     >
       <Toolbar>
-        <Typography variant="h6" noWrap component="div">
+        <Typography variant='h6' noWrap component='div'>
           Files
         </Typography>
       </Toolbar>
     </AppBar>
     <Drawer
-      variant="permanent"
+      variant='permanent'
       sx={{
         width: drawerWidth,
         flexShrink: 0,
@@ -49,7 +49,7 @@ const Files: NextPage = () => (
               <ListItemIcon>
                 <FolderIcon />
               </ListItemIcon>
-              <ListItemText primary="My files" />
+              <ListItemText primary='My files' />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
@@ -57,7 +57,7 @@ const Files: NextPage = () => (
               <ListItemIcon>
                 <PeopleIcon />
               </ListItemIcon>
-              <ListItemText primary="Shared with me" />
+              <ListItemText primary='Shared with me' />
             </ListItemButton>
           </ListItem>
         </List>
@@ -68,13 +68,13 @@ const Files: NextPage = () => (
               <ListItemIcon>
                 <SettingsIcon />
               </ListItemIcon>
-              <ListItemText primary="Settings" />
+              <ListItemText primary='Settings' />
             </ListItemButton>
           </ListItem>
         </List>
       </Box>
     </Drawer>
-    <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+    <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
       <Toolbar />
       <Typography paragraph>Content...</Typography>
     </Box>
