@@ -1,7 +1,10 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import { sequelize } from './db';
+import UserRoutes from './controllers/User';
 
 const app = express();
 
@@ -14,6 +17,9 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 const port = process.env.PORT || 3001;
+
+// User routes
+app.use('/user', UserRoutes);
 
 (async () => {
   await sequelize.sync({ force: true });
