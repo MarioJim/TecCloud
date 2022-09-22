@@ -27,14 +27,16 @@ const Home: NextPage = () => (
       <Typography variant='h1' align='center' fontSize={'4.5rem'}>
         Welcome to TecCloud!
       </Typography>
-      <Link href='/sign_up'>
+      <Link href='/login'>
         <Button variant='contained' size='large'>
           Login
         </Button>
       </Link>
-      <Button variant='contained' size='large'>
-        Sign up
-      </Button>
+      <Link href='/sign_up'>
+        <Button variant='contained' size='large'>
+          Sign up
+        </Button>
+      </Link>
     </Stack>
   </Container>
 );
