@@ -8,8 +8,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/cookie-parser": "^1.4.3",
+    "@types/jsonwebtoken": "^8.5.9",
+    "bcrypt": "^5.0.1",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.2",
     "express": "^4.18.1",
+    "express-async-handler": "^1.2.0",
+    "jsonwebtoken": "^8.5.1",
     "sequelize": "^6.22.1",
     "sqlite3": "^5.1.1",
     "ts-node": "^10.9.1"

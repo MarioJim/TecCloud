@@ -6,6 +6,8 @@ import {
   InferCreationAttributes,
 } from 'sequelize';
 import { sequelize } from './index';
+import * as jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 export class Folder extends Model<
   InferAttributes<Folder>,
@@ -52,9 +54,32 @@ export class User extends Model<
   declare lastName: string;
   declare username: string;
   declare password: string;
-  declare folderId: number;
+  declare token: CreationOptional<string>;
+  declare folderId: CreationOptional<number>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
+
+  async generateToken() {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (jwtSecret) {
+      const token = jwt.sign({ id: this.id.toString() }, jwtSecret, {
+        expiresIn: '10h',
+      });
+      this.token = token;
+      await this.save();
+      return token;
+    } else {
+      throw Promise.reject(Error('No JWT Secret has been defined'));
+    }
+  }
+
+  async comparePassword(password: string): Promise<boolean> {
+    return await bcrypt.compare(password, this.password);
+  }
+
+  static async hashPassword(password: string) {
+    return await bcrypt.hash(password, 10);
+  }
 }
 
 User.init(
@@ -66,15 +91,16 @@ User.init(
     },
     firstName: { type: DataTypes.STRING, allowNull: false },
     lastName: { type: DataTypes.STRING, allowNull: false },
-    username: { type: DataTypes.STRING, allowNull: false },
+    username: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: { type: DataTypes.STRING, allowNull: false },
+    token: { type: DataTypes.STRING, allowNull: true },
     folderId: {
       type: DataTypes.INTEGER,
       references: {
         model: Folder,
         key: 'id',
       },
-      allowNull: false,
+      allowNull: true,
     },
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE,
