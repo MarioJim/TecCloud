@@ -11,17 +11,17 @@ interface ScaffoldProps {
 const Scaffold = ({ children }: ScaffoldProps) => (
   <Box sx={{ display: 'flex' }}>
     <AppBar
-      position="fixed"
+      position='fixed'
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
     >
       <Toolbar>
-        <Typography variant="h6" noWrap component="div">
+        <Typography variant='h6' noWrap component='div'>
           TecCloud
         </Typography>
       </Toolbar>
     </AppBar>
     <Sidebar />
-    <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+    <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
       <Toolbar />
       {children}
     </Box>

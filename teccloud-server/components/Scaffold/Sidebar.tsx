@@ -11,7 +11,7 @@ import SidebarItem from './SidebarItem';
 
 const Sidebar = () => (
   <Drawer
-    variant="permanent"
+    variant='permanent'
     sx={{
       width: 240,
       flexShrink: 0,
@@ -24,18 +24,22 @@ const Sidebar = () => (
     <Toolbar />
     <Box sx={{ overflow: 'auto' }}>
       <List>
-        <SidebarItem path="/files" title="My files" icon={<FolderIcon />} />
         <SidebarItem
-          path="/shared"
-          title="Shared with me"
+          path='/files'
+          title='Files in my TecCloud'
+          icon={<FolderIcon />}
+        />
+        <SidebarItem
+          path='/shared'
+          title='Shared with me'
           icon={<PeopleIcon />}
         />
       </List>
       <Divider />
       <List>
         <SidebarItem
-          path="/settings"
-          title="Settings"
+          path='/settings'
+          title='Settings'
           icon={<SettingsIcon />}
         />
       </List>

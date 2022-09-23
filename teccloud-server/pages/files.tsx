@@ -51,7 +51,7 @@ const Files: NextPage = () => {
           sx={{
             width: '100%',
             minHeight: 'calc(100vh - 112px)',
-            bgcolor: isDragActive ? 'primary.main' : 'black',
+            bgcolor: isDragActive ? 'primary.main' : 'background.default',
           }}
           {...getRootProps()}
         >
