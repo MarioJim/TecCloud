@@ -67,20 +67,17 @@ export class User extends Model<
       });
       this.token = token;
       await this.save();
-      return Promise.resolve(token);
+      return token;
     } else {
       throw Promise.reject(Error('No JWT Secret has been defined'));
     }
   }
 
-  async comparePassword(password: string) {
-    const matches = await bcrypt.compare(password, this.password);
-    console.log(matches ? 'Pasword matched' : 'Password did not match');
-    return Promise.resolve(matches);
+  async comparePassword(password: string): Promise<boolean> {
+    return await bcrypt.compare(password, this.password);
   }
 
   static async hashPassword(password: string) {
-    console.log('hashing password on ', password);
     return await bcrypt.hash(password, 10);
   }
 }
