@@ -3,11 +3,13 @@ import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Divider from '@mui/material/Divider';
+import Button from '@mui/material/Divider';
 import List from '@mui/material/List';
 import FolderIcon from '@mui/icons-material/Folder';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SidebarItem from './SidebarItem';
+import SidebarLogout from './SidebarLogout';
 
 const Sidebar = () => (
   <Drawer
@@ -42,6 +44,10 @@ const Sidebar = () => (
           title='Settings'
           icon={<SettingsIcon />}
         />
+      </List>
+      <Divider />
+      <List>
+        <SidebarLogout />
       </List>
     </Box>
   </Drawer>
