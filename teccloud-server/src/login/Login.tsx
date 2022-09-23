@@ -6,6 +6,10 @@ import Button from '@mui/material/Button';
 import Link from 'next/link';
 import axios from 'axios';
 
+type ErrorResponse = {
+  error: string;
+};
+
 export default function Login() {
   const onSubmit: (e: React.FormEvent) => void = async (e) => {
     e.preventDefault();
@@ -26,8 +30,10 @@ export default function Login() {
       );
       sessionStorage.setItem('user', JSON.stringify(response.data.user));
       location.assign('/files');
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        alert((err.response?.data as ErrorResponse).error);
+      }
     }
   };
 
