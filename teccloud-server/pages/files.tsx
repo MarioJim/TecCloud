@@ -14,8 +14,28 @@ import ListItemText from '@mui/material/ListItemText';
 import FolderIcon from '@mui/icons-material/Folder';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
+import axios from 'axios';
 
 const drawerWidth = 240;
+
+export const getServerSideProps = async (ctx: { req: { headers: any } }) => {
+  const headers = ctx.req.headers;
+  try {
+    const res = await axios.get('http://localhost:3001/user/auth', {
+      headers,
+      withCredentials: true,
+    });
+    return { props: {} };
+  } catch (error) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: '/login',
+      },
+      props: {},
+    };
+  }
+};
 
 const Files: NextPage = () => (
   <Box sx={{ display: 'flex' }}>

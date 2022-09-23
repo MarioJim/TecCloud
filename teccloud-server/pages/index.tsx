@@ -6,6 +6,27 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Link from 'next/link';
 
+import axios from 'axios';
+
+export const getServerSideProps = async (ctx: { req: { headers: any } }) => {
+  const headers = ctx.req.headers;
+  try {
+    const res = await axios.get('http://localhost:3001/user/auth', {
+      headers,
+      withCredentials: true,
+    });
+    return {
+      redirect: {
+        permanent: false,
+        destination: '/files',
+      },
+      props: {},
+    };
+  } catch (error) {
+    return { props: {} };
+  }
+};
+
 const Home: NextPage = () => (
   <Container>
     <Head>

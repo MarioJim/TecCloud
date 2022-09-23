@@ -1,6 +1,15 @@
 import { User } from '../../db';
 import { Request, Response } from 'express';
-import CustomError from '../../middleware/customError';
+import * as jwt from 'jsonwebtoken';
+import { JwtPayload } from 'jsonwebtoken';
+
+interface VerifiedUserPayload extends JwtPayload {
+  id: number;
+}
+
+export interface RequestWithAuth extends Request {
+  user?: User;
+}
 
 class UserController {
   public register() {
@@ -35,7 +44,8 @@ class UserController {
             .json({ error: 'Username unavailable. Try a different one.' }),
         );
       }
-      await user.generateToken();
+      const token = await user.generateToken();
+      res.cookie('authcookie', token);
       res.status(201).json({
         success: true,
         message: 'User created successfully',
@@ -63,12 +73,54 @@ class UserController {
             .json({ error: 'Try again. Username and password do not match.' }),
         );
       }
-      await user.generateToken();
+      const token = await user.generateToken();
+      res.cookie('authcookie', token);
       res.status(201).json({
         success: true,
         message: 'Login successful',
         user,
       });
+    };
+  }
+
+  public isLoggedIn() {
+    return async (req: RequestWithAuth, res: Response) => {
+      const token = req.cookies.authcookie;
+      console.log('cookie ', token);
+      if (!token) {
+        return Promise.reject(res.status(401).json({ error: 'No session.' }));
+      }
+
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        return Promise.reject(res.status(401).json({ error: 'No session.' }));
+      }
+
+      try {
+        const data: VerifiedUserPayload = jwt.verify(
+          token,
+          jwtSecret,
+        ) as VerifiedUserPayload;
+        const user = await User.findByPk(data.id);
+        if (user && user.token != token) {
+          return Promise.reject(
+            res.status(401).json({ error: 'No current session.' }),
+          );
+        }
+
+        if (user) {
+          res.cookie('authcookie', token);
+          res.status(201).json({
+            success: true,
+            message: 'Active session',
+            user,
+          });
+        } else {
+          return Promise.reject(res.status(401).json({ error: 'No session.' }));
+        }
+      } catch (error) {
+        return Promise.reject(res.status(401).json({ error: 'No session.' }));
+      }
     };
   }
 }

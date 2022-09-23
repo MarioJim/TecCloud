@@ -31,6 +31,7 @@ export default function Register() {
       const response = await axios.post(
         'http://localhost:3001/user/register',
         inputs,
+        { withCredentials: true },
       );
       sessionStorage.setItem('user', JSON.stringify(response.data.user));
       location.assign('/files');

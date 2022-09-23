@@ -27,6 +27,7 @@ export default function Login() {
       const response = await axios.post(
         'http://localhost:3001/user/login',
         inputs,
+        { withCredentials: true },
       );
       sessionStorage.setItem('user', JSON.stringify(response.data.user));
       location.assign('/files');
