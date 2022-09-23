@@ -14,7 +14,7 @@ export class Folder extends Model<
   InferCreationAttributes<Folder>
 > {
   declare id: CreationOptional<number>;
-  declare parentId: number;
+  declare parentId: number | null;
   declare name: string;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
@@ -54,31 +54,30 @@ export class User extends Model<
   declare lastName: string;
   declare username: string;
   declare password: string;
+  declare folderId: number;
   declare token: CreationOptional<string>;
-  declare folderId: CreationOptional<number>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
-  async generateToken() {
+  async generateToken(): Promise<string> {
     const jwtSecret = process.env.JWT_SECRET;
-    if (jwtSecret) {
-      const token = jwt.sign({ id: this.id.toString() }, jwtSecret, {
-        expiresIn: '10h',
-      });
-      this.token = token;
-      await this.save();
-      return token;
-    } else {
-      throw Promise.reject(Error('No JWT Secret has been defined'));
+    if (!jwtSecret) {
+      throw new Error('No JWT Secret has been defined');
     }
+    const token = jwt.sign({ id: this.id.toString() }, jwtSecret, {
+      expiresIn: '10h',
+    });
+    this.token = token;
+    await this.save();
+    return token;
   }
 
-  async comparePassword(password: string): Promise<boolean> {
-    return await bcrypt.compare(password, this.password);
+  comparePassword(password: string): Promise<boolean> {
+    return bcrypt.compare(password, this.password);
   }
 
-  static async hashPassword(password: string) {
-    return await bcrypt.hash(password, 10);
+  static hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 10);
   }
 }
 
