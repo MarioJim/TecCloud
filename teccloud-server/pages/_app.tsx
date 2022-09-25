@@ -1,8 +1,12 @@
-import '../styles/globals.css';
 import type { AppProps } from 'next/app';
+import { Fragment } from 'react';
+import CssBaseline from '@mui/material/CssBaseline';
 
 const MyApp = ({ Component, pageProps }: AppProps) => (
-  <Component {...pageProps} />
+  <Fragment>
+    <CssBaseline />
+    <Component {...pageProps} />
+  </Fragment>
 );
 
 export default MyApp;
