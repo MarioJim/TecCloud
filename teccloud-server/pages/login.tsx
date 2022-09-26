@@ -1,8 +1,8 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Container from '@mui/material/Container';
-import Login from '../src/login/Login';
 import axios from 'axios';
+import Login from '../components/Login';
 
 export const getServerSideProps = async (ctx: { req: { headers: any } }) => {
   const headers = ctx.req.headers;
@@ -23,7 +23,7 @@ export const getServerSideProps = async (ctx: { req: { headers: any } }) => {
   }
 };
 
-const SignUp: NextPage = () => (
+const LoginPage: NextPage = () => (
   <Container>
     <Head>
       <title>TecCloud: Sign Up</title>
@@ -38,4 +38,4 @@ const SignUp: NextPage = () => (
   </Container>
 );
 
-export default SignUp;
+export default LoginPage;
