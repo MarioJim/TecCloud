@@ -16,7 +16,7 @@ class UserController {
       if (!passwordPattern.test(password)) {
         return res
           .status(400)
-          .json({ error: 'Password does not follow the requeriments!' });
+          .json({ error: 'Password does not follow the requirements!' });
       }
       const hashedPassword = await User.hashPassword(password);
       let user;
