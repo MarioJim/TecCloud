@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon --watch src --exec yarn start",
-    "start": "ts-node src/main.ts",
+    "dev": "ENVIRONMENT=dev nodemon --watch src --exec 'ts-node src/main.ts'",
+    "start": "ENVIRONMENT=prod ts-node src/main.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
