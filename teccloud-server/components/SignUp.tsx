@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
@@ -10,7 +10,7 @@ type ErrorResponse = {
   error: string;
 };
 
-export default function Register() {
+export default function SignUp() {
   const onSubmit: (e: React.FormEvent) => void = async (e) => {
     e.preventDefault();
     const target = e.target as typeof e.target & {

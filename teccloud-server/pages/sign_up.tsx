@@ -1,7 +1,7 @@
 import type { NextPage, GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Container from '@mui/material/Container';
-import Register from '../src/register/Register';
+import SignUp from '../components/SignUp';
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const res = await fetch('http://localhost:3001/user/auth', {
@@ -19,14 +19,14 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   return { props: {} };
 };
 
-const SignUp: NextPage = () => (
+const SignUpPage: NextPage = () => (
   <Container>
     <Head>
       <title>Sign Up - TecCloud</title>
     </Head>
 
-    <Register />
+    <SignUp />
   </Container>
 );
 
-export default SignUp;
+export default SignUpPage;
