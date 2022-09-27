@@ -1,9 +1,5 @@
 import { Request, Response, RequestHandler } from 'express';
-import * as jwt from 'jsonwebtoken';
 import { Folder, sequelize, User } from '../../db';
-
-type VerifiedUserPayload = jwt.JwtPayload & { id: number };
-type RequestWithAuth = Request<{ user?: User }>;
 
 class UserController {
   public register(): RequestHandler {
@@ -79,31 +75,14 @@ class UserController {
   }
 
   public isLoggedIn(): RequestHandler {
-    return async (req: RequestWithAuth, res: Response) => {
-      const token = req.cookies.authcookie;
-      const jwtSecret = process.env.JWT_SECRET;
-      if (!token || !jwtSecret) {
-        return res.status(401).json({ error: 'No session.' });
-      }
+    return async (req: Request, res: Response) => {
+      const { user } = req;
 
-      try {
-        const data = jwt.verify(token, jwtSecret) as VerifiedUserPayload;
-        const user = await User.findByPk(data.id);
-        if (user && user.token !== token) {
-          return res.status(401).json({ error: 'No current session.' });
-        }
-
-        if (user) {
-          res.cookie('authcookie', token);
-          return res.status(201).json({
-            success: true,
-            message: 'Active session',
-            user,
-          });
-        }
-      } catch (error) {}
-
-      return res.status(401).json({ error: 'No session.' });
+      res.status(201).json({
+        success: true,
+        message: 'Active session',
+        user,
+      });
     };
   }
 }
