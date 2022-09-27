@@ -1,32 +1,33 @@
-import type { NextPage } from 'next';
 import { Fragment, useCallback, useState } from 'react';
 import Head from 'next/head';
-import axios from 'axios';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { DropEvent, FileRejection, useDropzone } from 'react-dropzone';
 import Scaffold from '../components/Scaffold';
+import { GetServerSideUser, AuthenticatedPage, User } from '../types';
 
-export const getServerSideProps = async (ctx: { req: { headers: any } }) => {
-  const headers = ctx.req.headers;
-  try {
-    const res = await axios.get('http://localhost:3001/user/auth', {
-      headers,
-      withCredentials: true,
-    });
-    return { props: {} };
-  } catch (error) {
+export const getServerSideProps: GetServerSideUser = async (ctx) => {
+  const res = await fetch('http://localhost:3001/user/auth', {
+    credentials: 'include',
+    headers: ctx.req.headers as HeadersInit,
+  });
+  if (res.status === 201) {
+    const body = await res.json();
     return {
-      redirect: {
-        permanent: false,
-        destination: '/login',
+      props: {
+        user: body.user as User,
       },
-      props: {},
     };
   }
+  return {
+    redirect: {
+      permanent: false,
+      destination: '/login',
+    },
+  };
 };
 
-const Files: NextPage = () => {
+const Files: AuthenticatedPage = ({ user }) => {
   const [lastFilesDropped, setLastFilesDropped] = useState<File[]>([]);
   const onDrop = useCallback(
     (
@@ -46,7 +47,7 @@ const Files: NextPage = () => {
       <Head>
         <title>Files - TecCloud</title>
       </Head>
-      <Scaffold>
+      <Scaffold user={user}>
         <Box
           sx={{
             width: '100%',

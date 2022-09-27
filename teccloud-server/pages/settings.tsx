@@ -1,15 +1,36 @@
-import type { NextPage } from 'next';
 import { Fragment } from 'react';
 import Head from 'next/head';
 import Typography from '@mui/material/Typography';
 import Scaffold from '../components/Scaffold';
+import { GetServerSideUser, AuthenticatedPage, User } from '../types';
 
-const Settings: NextPage = () => (
+export const getServerSideProps: GetServerSideUser = async (ctx) => {
+  const res = await fetch('http://localhost:3001/user/auth', {
+    credentials: 'include',
+    headers: ctx.req.headers as HeadersInit,
+  });
+  if (res.status === 201) {
+    const body = await res.json();
+    return {
+      props: {
+        user: body.user as User,
+      },
+    };
+  }
+  return {
+    redirect: {
+      permanent: false,
+      destination: '/login',
+    },
+  };
+};
+
+const Settings: AuthenticatedPage = ({ user }) => (
   <Fragment>
     <Head>
       <title>Settings - TecCloud</title>
     </Head>
-    <Scaffold>
+    <Scaffold user={user}>
       <Typography paragraph>My settings...</Typography>
     </Scaffold>
   </Fragment>

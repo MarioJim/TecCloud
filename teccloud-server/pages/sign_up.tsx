@@ -1,37 +1,28 @@
-import type { NextPage } from 'next';
+import type { NextPage, GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Container from '@mui/material/Container';
 import SignUp from '../components/SignUp';
-import axios from 'axios';
 
-export const getServerSideProps = async (ctx: { req: { headers: any } }) => {
-  const headers = ctx.req.headers;
-  try {
-    const res = await axios.get('http://localhost:3001/user/auth', {
-      headers,
-      withCredentials: true,
-    });
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const res = await fetch('http://localhost:3001/user/auth', {
+    credentials: 'include',
+    headers: ctx.req.headers as HeadersInit,
+  });
+  if (res.status === 201) {
     return {
       redirect: {
         permanent: false,
         destination: '/files',
       },
-      props: {},
     };
-  } catch (error) {
-    return { props: {} };
   }
+  return { props: {} };
 };
 
 const SignUpPage: NextPage = () => (
   <Container>
     <Head>
-      <title>TecCloud: Sign Up</title>
-      <meta
-        name='description'
-        content='Store, search and share your documents.'
-      />
-      <link rel='icon' href='/favicon.ico' />
+      <title>Sign Up - TecCloud</title>
     </Head>
 
     <SignUp />
