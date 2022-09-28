@@ -6,18 +6,18 @@ import ListItemText from '@mui/material/ListItemText';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 const SidebarLogout = () => {
-  const logout: (e: React.FormEvent) => void = async (e) => {
+  const logout = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await fetch('http://localhost:3001/user/logout', {
         method: 'post',
         credentials: 'include',
       });
-      sessionStorage.removeItem('user');
       location.assign('/');
     } catch (err) {
       console.log(err);
     }
+    document.cookie = 'authcookie=;expires=' + new Date().toUTCString();
   };
 
   return (

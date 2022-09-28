@@ -33,7 +33,6 @@ export default function SignUp() {
         inputs,
         { withCredentials: true },
       );
-      sessionStorage.setItem('user', JSON.stringify(response.data.user));
       location.assign('/files');
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
