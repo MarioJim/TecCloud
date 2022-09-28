@@ -9,7 +9,7 @@ const SidebarLogout = () => {
   const logout: (e: React.FormEvent) => void = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:3001/user/logout', {
+      await fetch('http://localhost:3001/user/logout', {
         method: 'post',
         credentials: 'include',
       });
