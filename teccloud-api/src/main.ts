@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import { sequelize } from './db';
+import FileRoutes from './controllers/File';
 import UserRoutes from './controllers/User';
 
 const app = express();
@@ -15,6 +16,8 @@ app.use(cookieParser());
 
 // User routes
 app.use('/user', UserRoutes);
+// File routes
+app.use('/files', FileRoutes);
 
 (async () => {
   await sequelize.sync({ force: true });

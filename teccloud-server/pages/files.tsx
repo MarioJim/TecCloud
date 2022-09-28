@@ -28,18 +28,25 @@ export const getServerSideProps: GetServerSideUser = async (ctx) => {
 };
 
 const Files: AuthenticatedPage = ({ user }) => {
-  const [lastFilesDropped, setLastFilesDropped] = useState<File[]>([]);
-  const onDrop = useCallback(
-    (
-      acceptedFiles: File[],
-      rejectedFiles: FileRejection[],
-      event: DropEvent,
-    ) => {
-      console.log(acceptedFiles, rejectedFiles, event);
-      setLastFilesDropped(acceptedFiles);
-    },
-    [],
-  );
+  const [lastFilesDropped, setLastFilesDropped] = useState<string[]>([]);
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    const formData = new FormData();
+    formData.set('folderId', `${user.folderId}`);
+    acceptedFiles.forEach((file) => formData.append('files', file));
+    const response = await fetch('http://localhost:3001/files/upload', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+    const jsonRes = await response.json();
+    if (response.status !== 201) {
+      console.error('Error uploading files:', jsonRes);
+      return;
+    }
+    setLastFilesDropped(
+      jsonRes.files.map((f: any) => JSON.stringify(f, null, 2)),
+    );
+  }, []);
   const { getInputProps, getRootProps, isDragActive } = useDropzone({ onDrop });
 
   return (
@@ -64,9 +71,10 @@ const Files: AuthenticatedPage = ({ user }) => {
             <Typography paragraph>Drop a file here!</Typography>
           )}
           {lastFilesDropped.map((file, i) => (
-            <Typography paragraph key={i}>
-              Fake uploading file {file.name}
-            </Typography>
+            <div key={i}>
+              <Typography paragraph>Uploaded file</Typography>
+              <pre>{file}</pre>
+            </div>
           ))}
         </Box>
       </Scaffold>
