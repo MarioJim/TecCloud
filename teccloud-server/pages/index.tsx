@@ -26,6 +26,11 @@ const Home: NextPage = () => (
   <Container>
     <Head>
       <title>TecCloud</title>
+      <meta
+        name='description'
+        content='Store, search and share your documents'
+      />
+      <link rel='icon' href='/favicon.ico' />
     </Head>
 
     <Stack
