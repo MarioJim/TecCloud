@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "ENVIRONMENT=dev nodemon --watch src --exec 'ts-node src/main.ts'",
-    "dev-win": "set ENVIRONMENT=dev && nodemon --watch src --exec 'ts-node src/main.ts'",
+    "dev-win": "set ENVIRONMENT=dev&& nodemon --watch src --exec ts-node src/main.ts",
     "start": "ENVIRONMENT=prod ts-node src/main.ts",
     "typecheck": "tsc --noEmit"
   },

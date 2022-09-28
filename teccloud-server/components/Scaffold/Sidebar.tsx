@@ -8,6 +8,7 @@ import FolderIcon from '@mui/icons-material/Folder';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SidebarItem from './SidebarItem';
+import SidebarLogout from './SidebarLogout';
 
 const Sidebar = () => (
   <Drawer
@@ -42,6 +43,10 @@ const Sidebar = () => (
           title='Settings'
           icon={<SettingsIcon />}
         />
+      </List>
+      <Divider />
+      <List>
+        <SidebarLogout />
       </List>
     </Box>
   </Drawer>

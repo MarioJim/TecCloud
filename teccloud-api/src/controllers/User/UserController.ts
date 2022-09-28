@@ -74,6 +74,18 @@ class UserController {
     };
   }
 
+  public logout(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const user = await User.findByPk(req.user?.id);
+      user?.update({ token: '' });
+      res.clearCookie('authcookie');
+      res.status(200).json({
+        success: true,
+        message: 'Logout successful',
+      });
+    };
+  }
+
   public isLoggedIn(): RequestHandler {
     return async (req: Request, res: Response) => {
       const { user } = req;
