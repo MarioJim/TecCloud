@@ -30,22 +30,25 @@ export const getServerSideProps: GetServerSideUser = async (ctx) => {
 
 const Files: AuthenticatedPage = ({ user }) => {
   const [lastFilesDropped, setLastFilesDropped] = useState<any[]>([]);
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const formData = new FormData();
-    formData.set('folderId', `${user.folderId}`);
-    acceptedFiles.forEach((file) => formData.append('files', file));
-    const response = await fetch('http://localhost:3001/files/upload', {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    });
-    const jsonRes = await response.json();
-    if (response.status !== 201) {
-      console.error('Error uploading files:', jsonRes);
-      return;
-    }
-    setLastFilesDropped(jsonRes.files);
-  }, []);
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      const formData = new FormData();
+      formData.set('folderId', `${user.folderId}`);
+      acceptedFiles.forEach((file) => formData.append('files', file));
+      const response = await fetch('http://localhost:3001/files/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      const jsonRes = await response.json();
+      if (response.status !== 201) {
+        console.error('Error uploading files:', jsonRes);
+        return;
+      }
+      setLastFilesDropped(jsonRes.files);
+    },
+    [user.folderId],
+  );
   const { getInputProps, getRootProps, isDragActive } = useDropzone({ onDrop });
 
   return (
