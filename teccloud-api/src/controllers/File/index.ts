@@ -13,5 +13,6 @@ const upload = multer({
 const router = Router({ mergeParams: true });
 
 router.post('/upload', auth, upload.array('files'), FileController.upload());
+router.get('/download/:fileId', auth, FileController.download());
 
 export default router;

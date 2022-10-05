@@ -1,8 +1,9 @@
 import { Fragment, useCallback, useState } from 'react';
 import Head from 'next/head';
 import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
-import { DropEvent, FileRejection, useDropzone } from 'react-dropzone';
+import { useDropzone } from 'react-dropzone';
 import Scaffold from '../components/Scaffold';
 import { GetServerSideUser, AuthenticatedPage, User } from '../types';
 
@@ -28,7 +29,7 @@ export const getServerSideProps: GetServerSideUser = async (ctx) => {
 };
 
 const Files: AuthenticatedPage = ({ user }) => {
-  const [lastFilesDropped, setLastFilesDropped] = useState<string[]>([]);
+  const [lastFilesDropped, setLastFilesDropped] = useState<any[]>([]);
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const formData = new FormData();
     formData.set('folderId', `${user.folderId}`);
@@ -43,9 +44,7 @@ const Files: AuthenticatedPage = ({ user }) => {
       console.error('Error uploading files:', jsonRes);
       return;
     }
-    setLastFilesDropped(
-      jsonRes.files.map((f: any) => JSON.stringify(f, null, 2)),
-    );
+    setLastFilesDropped(jsonRes.files);
   }, []);
   const { getInputProps, getRootProps, isDragActive } = useDropzone({ onDrop });
 
@@ -73,7 +72,14 @@ const Files: AuthenticatedPage = ({ user }) => {
           {lastFilesDropped.map((file, i) => (
             <div key={i}>
               <Typography paragraph>Uploaded file</Typography>
-              <pre>{file}</pre>
+              <pre>{JSON.stringify(file, null, 2)}</pre>
+              <Link
+                target='_blank'
+                href={`http://localhost:3001/files/download/${file.fileId}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                Download
+              </Link>
             </div>
           ))}
         </Box>
