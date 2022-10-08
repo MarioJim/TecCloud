@@ -1,56 +1,76 @@
 import fs from 'fs';
 import path from 'path';
 import { Response, RequestHandler, Request } from 'express';
-import iconv from 'iconv-lite';
+import { Multer, MulterError } from 'multer';
 import { File } from '../../db';
+import { iso88591_to_utf8, utf8_to_iso88591 } from '../../utils/encoding';
 
 class FileController {
-  public upload(): RequestHandler {
+  public upload(multerInstance: Multer): RequestHandler {
     return async (req: Request, res: Response) => {
-      const { files: maybeFiles } = req;
-      const folderId = parseInt(req.body.folderId);
-      if (!maybeFiles) {
-        return res.status(201).json({
-          success: true,
-          message: 'No files uploaded',
-        });
-      }
+      multerInstance.array('files')(req, res, (error) => {
+        if (error instanceof MulterError) {
+          if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(413).json({
+              success: false,
+              message: `File too large`,
+            });
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: `Error uploading files:\n${error.message}`,
+            });
+          }
+        } else if (error) {
+          return res.status(500).json({
+            success: false,
+            message: `Error uploading files:\n${error}`,
+          });
+        }
 
-      try {
+        const { files: maybeFiles } = req;
+        const folderId = parseInt(req.body.folderId);
+        if (!maybeFiles) {
+          return res.status(201).json({
+            success: true,
+            message: 'No files uploaded',
+          });
+        }
+
         const files = maybeFiles as Express.Multer.File[];
-        const savedFiles = await Promise.all(
-          files.map((file) => {
-            const encodedName = iconv.encode(file.originalname, 'iso-8859-1');
-            return File.create({
+        Promise.all(
+          files.map((file) =>
+            File.create({
               fileId: file.filename,
-              name: iconv.decode(encodedName, 'utf-8'),
+              name: iso88591_to_utf8(file.originalname),
               folderId: folderId,
               size: file.size,
               fileType: file.mimetype,
-              serverPath: file.path,
+            }),
+          ),
+        )
+          .then((savedFiles) => {
+            res.status(201).json({
+              success: true,
+              message: 'Files uploaded successfully',
+              files: savedFiles,
             });
-          }),
-        );
-
-        res.status(201).json({
-          success: true,
-          message: 'Files uploaded successfully',
-          files: savedFiles,
-        });
-      } catch (e) {
-        res.status(500).json({
-          success: true,
-          message: `Error uploading files:\n${e}`,
-        });
-      }
+          })
+          .catch((e) => {
+            res.status(500).json({
+              success: false,
+              message: `Error uploading files:\n${e}`,
+            });
+          });
+      });
     };
   }
 
   public download(): RequestHandler {
     return async (req: Request, res: Response) => {
       const { fileId } = req.params;
-      const { user } = req;
-      if (!fileId || fileId.length !== 32 || !user) {
+      const { userId } = req;
+      if (!fileId || fileId.length !== 32 || !userId) {
         return res.sendStatus(404);
       }
 
@@ -59,7 +79,7 @@ class FileController {
         return res.sendStatus(404);
       }
 
-      const accessableByUser = await fileInfo.accessableBy(user);
+      const accessableByUser = await fileInfo.accessableBy(userId);
       if (!accessableByUser) {
         return res.sendStatus(401);
       }
@@ -68,7 +88,8 @@ class FileController {
         path.join(process.env.FILES_FOLDER as string, fileId),
       );
       if (fs.existsSync(fileInServer)) {
-        res.set('Content-Disposition', `inline; filename="${fileInfo.name}"`);
+        const originalName = utf8_to_iso88591(fileInfo.name);
+        res.set('Content-Disposition', `inline; filename="${originalName}"`);
         res.contentType(fileInfo.fileType);
         res.sendFile(fileInServer);
       } else {

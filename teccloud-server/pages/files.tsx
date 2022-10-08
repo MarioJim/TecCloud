@@ -1,3 +1,5 @@
+import type { GetServerSideUser, AuthenticatedPage, User } from '../types';
+import axios from 'axios';
 import { Fragment, useCallback, useState } from 'react';
 import Head from 'next/head';
 import Box from '@mui/material/Box';
@@ -5,7 +7,10 @@ import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import { useDropzone } from 'react-dropzone';
 import Scaffold from '../components/Scaffold';
-import { GetServerSideUser, AuthenticatedPage, User } from '../types';
+import UploadModal from '../components/UploadModal';
+import UploadStatusDialog, {
+  UploadStatus,
+} from '../components/UploadStatusDialog';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
   const res = await fetch('http://localhost:3001/user/auth', {
@@ -29,27 +34,60 @@ export const getServerSideProps: GetServerSideUser = async (ctx) => {
 };
 
 const Files: AuthenticatedPage = ({ user }) => {
+  const [numberDraggedFiles, setNumberDraggedFiles] = useState<number>(0);
   const [lastFilesDropped, setLastFilesDropped] = useState<any[]>([]);
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
+    status: 'initial',
+  });
+
+  const onUploadProgress = useCallback((e: ProgressEvent) => {
+    const percentage = (100 * e.loaded) / e.total;
+    if (percentage < 100) {
+      setUploadStatus({ status: 'progress', percentage });
+    } else {
+      setUploadStatus({ status: 'success' });
+    }
+  }, []);
+
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       const formData = new FormData();
       formData.set('folderId', `${user.folderId}`);
       acceptedFiles.forEach((file) => formData.append('files', file));
-      const response = await fetch('http://localhost:3001/files/upload', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-      const jsonRes = await response.json();
-      if (response.status !== 201) {
-        console.error('Error uploading files:', jsonRes);
-        return;
+
+      try {
+        const response = await axios.post(
+          'http://localhost:3001/files/upload',
+          formData,
+          { withCredentials: true, onUploadProgress },
+        );
+        setLastFilesDropped(response.data.files);
+      } catch (e: any) {
+        if (e.response.status === 413) {
+          setUploadStatus({
+            status: 'error',
+            message:
+              'Files were too large, try uploading files smaller than 10MB',
+          });
+        } else {
+          setUploadStatus({
+            status: 'error',
+            message:
+              'The server ran into an error while receiving your files, try again!',
+          });
+        }
+        console.error('Error uploading files:', e);
       }
-      setLastFilesDropped(jsonRes.files);
     },
-    [user.folderId],
+    [onUploadProgress, user.folderId],
   );
-  const { getInputProps, getRootProps, isDragActive } = useDropzone({ onDrop });
+
+  const { getInputProps, getRootProps, isDragActive } = useDropzone({
+    onDrop,
+    onDragEnter: (e) =>
+      setNumberDraggedFiles(e.dataTransfer?.items.length || 0),
+    noKeyboard: true,
+  });
 
   return (
     <Fragment>
@@ -57,21 +95,17 @@ const Files: AuthenticatedPage = ({ user }) => {
         <title>Files - TecCloud</title>
       </Head>
       <Scaffold user={user}>
+        <UploadModal open={isDragActive} numberFiles={numberDraggedFiles} />
+        <UploadStatusDialog status={uploadStatus} setStatus={setUploadStatus} />
         <Box
-          sx={{
-            width: '100%',
-            minHeight: 'calc(100vh - 112px)',
-            bgcolor: isDragActive ? 'primary.main' : 'background.default',
-          }}
+          sx={{ width: '100%', minHeight: 'calc(100vh - 112px)' }}
           {...getRootProps()}
         >
           <Typography paragraph>My files...</Typography>
           <input {...getInputProps()} />
-          {isDragActive ? (
-            <Typography paragraph>Now drop it!</Typography>
-          ) : (
-            <Typography paragraph>Drop a file here!</Typography>
-          )}
+          <Typography paragraph>
+            Drop a file here, or click to select a file to upload!
+          </Typography>
           {lastFilesDropped.map((file, i) => (
             <div key={i}>
               <Typography paragraph>Uploaded file</Typography>

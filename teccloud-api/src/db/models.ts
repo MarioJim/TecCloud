@@ -132,22 +132,22 @@ export class File extends Model<
   declare name: string;
   declare size: number;
   declare fileType: string;
-  declare serverPath: string;
   declare accessByLink: CreationOptional<'private' | 'public'>;
   declare lastViewed: CreationOptional<Date>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
-  async accessableBy(user: User): Promise<boolean> {
+  async accessableBy(userId: number): Promise<boolean> {
     if (this.accessByLink === 'public') {
       return true;
     }
+    const user = await User.findByPk(userId);
     const folder = await Folder.findByPk(this.folderId);
-    if (folder?.isOwnedBy(user) || false) {
+    if ((user && folder?.isOwnedBy(user)) || false) {
       return true;
     }
     const access = await FileAccess.findOne({
-      where: { fileId: this.id, userId: user.id },
+      where: { fileId: this.id, userId },
     });
     return access !== null;
   }
@@ -174,7 +174,6 @@ File.init(
       defaultValue: 0,
     },
     fileType: { type: DataTypes.STRING, allowNull: false },
-    serverPath: { type: DataTypes.STRING, allowNull: false },
     accessByLink: {
       type: DataTypes.ENUM,
       values: ['private', 'public'],
