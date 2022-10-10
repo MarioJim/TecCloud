@@ -13,9 +13,10 @@ import UploadStatusDialog, {
 } from '../../components/UploadStatusDialog';
 import SingleFile from '../../components/SingleFile';
 import ReplaceFileModal from '../../components/ReplaceFileModal';
+import { apiServer } from '../../config';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
-  const res = await fetch('http://localhost:3001/user/auth', {
+  const res = await fetch(`${apiServer}/user/auth`, {
     credentials: 'include',
     headers: ctx.req.headers as HeadersInit,
   });
@@ -54,13 +55,10 @@ const Files: AuthenticatedPage = ({ user }) => {
 
   useEffect(() => {
     const fetchFiles = async () => {
-      const filesResponse = await fetch(
-        `http://localhost:3001/files/${folderId}`,
-        {
-          method: 'get',
-          credentials: 'include',
-        },
-      );
+      const filesResponse = await fetch(`${apiServer}/files/${folderId}`, {
+        method: 'get',
+        credentials: 'include',
+      });
       const filesJson = await filesResponse.json();
       setFolderFiles(filesJson);
     };
@@ -97,7 +95,7 @@ const Files: AuthenticatedPage = ({ user }) => {
 
       try {
         const response = await axios.post(
-          'http://localhost:3001/files/upload',
+          `${apiServer}/files/upload`,
           formData,
           {
             withCredentials: true,

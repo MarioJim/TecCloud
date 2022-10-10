@@ -2,11 +2,12 @@ import { Router } from 'express';
 import multer from 'multer';
 import auth from '../../middleware/auth';
 import FileController from './FileController';
+import { filesFolder } from '../../config';
 
 const MB = 1024 * 1024;
 
 const multerInstance = multer({
-  dest: process.env.FILES_FOLDER,
+  dest: filesFolder,
   limits: { fileSize: 10 * MB },
 });
 

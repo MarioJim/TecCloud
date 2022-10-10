@@ -8,6 +8,7 @@ import {
 import * as jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { sequelize, Folder } from './index';
+import { jwtSecret } from '../config';
 
 export class User extends Model<
   InferAttributes<User>,
@@ -24,10 +25,6 @@ export class User extends Model<
   declare updatedAt: CreationOptional<Date>;
 
   async generateToken(): Promise<string> {
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new Error('No JWT Secret has been defined');
-    }
     const token = jwt.sign({ id: this.id.toString() }, jwtSecret, {
       expiresIn: '10h',
     });
