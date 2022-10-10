@@ -3,9 +3,10 @@ import Head from 'next/head';
 import Typography from '@mui/material/Typography';
 import Scaffold from '../components/Scaffold';
 import { User, GetServerSideUser, AuthenticatedPage } from '../types';
+import { apiServer } from '../config';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
-  const res = await fetch('http://localhost:3001/user/auth', {
+  const res = await fetch(`${apiServer}/user/auth`, {
     credentials: 'include',
     headers: ctx.req.headers as HeadersInit,
   });

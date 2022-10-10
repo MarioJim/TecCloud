@@ -1,5 +1,6 @@
 import { Handler, NextFunction, Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
+import { jwtSecret } from '../config';
 
 const auth: Handler = async (
   req: Request,
@@ -7,8 +8,7 @@ const auth: Handler = async (
   next: NextFunction,
 ) => {
   const token = req.cookies.authcookie;
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!token || !jwtSecret) {
+  if (!token) {
     return res.status(401).json({ error: 'No session.' });
   }
 

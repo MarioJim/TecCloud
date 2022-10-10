@@ -4,6 +4,7 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import DeleteFileModal from './DeleteFileModal';
+import { apiServer } from '../config';
 
 interface SingleFileProps {
   fileName: string;
@@ -31,7 +32,7 @@ const SingleFile = ({ fileName, originalName }: SingleFileProps) => (
         aria-label='delete'
         size='large'
         target='_blank'
-        href={`http://localhost:3001/files/download/${fileName}`}
+        href={`${apiServer}/files/download/${fileName}`}
       >
         <DownloadForOfflineIcon fontSize='inherit' />
       </IconButton>

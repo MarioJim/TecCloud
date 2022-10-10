@@ -5,6 +5,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Link from 'next/link';
 import axios from 'axios';
+import { apiServer } from '../config';
 
 type ErrorResponse = {
   error: string;
@@ -24,11 +25,9 @@ export default function Login() {
     };
 
     try {
-      const response = await axios.post(
-        'http://localhost:3001/user/login',
-        inputs,
-        { withCredentials: true },
-      );
+      await axios.post(`${apiServer}/user/login`, inputs, {
+        withCredentials: true,
+      });
       location.assign('/files');
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {

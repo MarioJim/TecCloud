@@ -1,9 +1,20 @@
 import { Sequelize } from 'sequelize';
+import { database, postgres, sqlite } from '../config';
 
-export const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: './teccloud.sqlite',
-});
+export const sequelize = new Sequelize(
+  database === 'postgres'
+    ? {
+        dialect: 'postgres',
+        host: postgres.host,
+        database: postgres.database,
+        username: postgres.user,
+        password: postgres.password,
+      }
+    : {
+        dialect: 'sqlite',
+        storage: sqlite.file,
+      },
+);
 
 import { File } from './file';
 import { FileAccess } from './fileaccess';

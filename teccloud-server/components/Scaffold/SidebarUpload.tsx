@@ -3,8 +3,9 @@ import axios from 'axios';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Button from '@mui/material/Button';
 import ListItem from '@mui/material/ListItem';
-import UploadStatusDialog, { UploadStatus } from '../UploadStatusDialog';
 import { useDropzone } from 'react-dropzone';
+import UploadStatusDialog, { UploadStatus } from '../UploadStatusDialog';
+import { apiServer } from '../../config';
 
 interface SidebarUploadProps {
   folderId: number;
@@ -52,7 +53,7 @@ const SidebarUpload = ({
 
       try {
         const response = await axios.post(
-          'http://localhost:3001/files/upload',
+          `${apiServer}/files/upload`,
           formData,
           {
             withCredentials: true,

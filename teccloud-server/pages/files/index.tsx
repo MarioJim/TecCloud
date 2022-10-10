@@ -1,10 +1,11 @@
 import type { GetServerSideUser } from '../../types';
 import { Fragment } from 'react';
 import Head from 'next/head';
+import { apiServer } from '../../config';
 
 /// Should always redirect somewhere
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
-  const res = await fetch('http://localhost:3001/user/auth', {
+  const res = await fetch(`${apiServer}/user/auth`, {
     credentials: 'include',
     headers: ctx.req.headers as HeadersInit,
   });
