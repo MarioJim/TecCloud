@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  server:
+    build: ./teccloud-server
+    ports:
+      - '3000:3000'
+    environment:
+      - API_SERVER_URL=http://api:3001
+    depends_on:
+      - api
+
+  api:
+    build: ./teccloud-api
+    ports:
+      - '3001:3001'
+    environment:
+      - PG_HOST=database
+      - PG_USER=teccloudapi
+      - PG_PASSWORD=verysecretpasswordfordb
+      - PG_DATABASE=teccloud_db
+    volumes:
+      - ./teccloud-api/userfiles:/app/userfiles
+    depends_on:
+      - database
+
+  database:
+    image: 'postgres:14'
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=teccloudapi
+      - POSTGRES_PASSWORD=verysecretpasswordfordb
+      - POSTGRES_DB=teccloud_db
+    volumes:
+      - teccloud_data:/var/lib/postgresql/data
+
+volumes:
+  teccloud_data:
