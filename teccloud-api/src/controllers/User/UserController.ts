@@ -76,7 +76,7 @@ class UserController {
 
   public logout(): RequestHandler {
     return async (req: Request, res: Response) => {
-      const user = await User.findByPk(req.user?.id);
+      const user = await User.findByPk(req.userId);
       user?.update({ token: '' });
       res.clearCookie('authcookie');
       res.status(200).json({
@@ -88,13 +88,17 @@ class UserController {
 
   public isLoggedIn(): RequestHandler {
     return async (req: Request, res: Response) => {
-      const { user } = req;
-
-      res.status(201).json({
-        success: true,
-        message: 'Active session',
-        user,
-      });
+      const user = await User.findByPk(req.userId);
+      if (user !== null) {
+        res.status(201).json({
+          success: true,
+          message: 'Active session',
+          user,
+        });
+      } else {
+        // Only happens when clearing the DB
+        res.sendStatus(401);
+      }
     };
   }
 }

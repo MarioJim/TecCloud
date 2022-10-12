@@ -18,6 +18,17 @@ export class Folder extends Model<
   declare name: string;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
+
+  async isOwnedBy(user: User): Promise<boolean> {
+    if (user.folderId === this.id || user.folderId === this.parentId) {
+      return true;
+    }
+    if (this.parentId === null) {
+      return false;
+    }
+    const parentFolder = await Folder.findByPk(this.parentId);
+    return parentFolder?.isOwnedBy(user) || false;
+  }
 }
 
 Folder.init(
@@ -116,14 +127,31 @@ export class File extends Model<
   InferCreationAttributes<File>
 > {
   declare id: CreationOptional<number>;
+  declare fileId: string;
   declare folderId: number;
   declare name: string;
-  declare serverPath: string;
   declare size: number;
-  declare accessByLink: 'private' | 'public';
-  declare lastViewed: Date;
+  declare fileType: string;
+  declare accessByLink: CreationOptional<'private' | 'public'>;
+  declare lastViewed: CreationOptional<Date>;
+  declare timesViewed: CreationOptional<number>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
+
+  async accessableBy(userId: number): Promise<boolean> {
+    if (this.accessByLink === 'public') {
+      return true;
+    }
+    const user = await User.findByPk(userId);
+    const folder = await Folder.findByPk(this.folderId);
+    if ((user && folder?.isOwnedBy(user)) || false) {
+      return true;
+    }
+    const access = await FileAccess.findOne({
+      where: { fileId: this.id, userId },
+    });
+    return access !== null;
+  }
 }
 
 File.init(
@@ -133,6 +161,7 @@ File.init(
       autoIncrement: true,
       primaryKey: true,
     },
+    fileId: { type: DataTypes.STRING, allowNull: false },
     folderId: {
       type: DataTypes.INTEGER,
       references: {
@@ -141,11 +170,12 @@ File.init(
       },
     },
     name: { type: DataTypes.STRING, allowNull: false },
-    serverPath: { type: DataTypes.STRING, allowNull: false },
     size: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       defaultValue: 0,
     },
+    fileType: { type: DataTypes.STRING, allowNull: false },
     accessByLink: {
       type: DataTypes.ENUM,
       values: ['private', 'public'],
@@ -156,6 +186,11 @@ File.init(
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
+    timesViewed: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE,
   },
@@ -163,6 +198,7 @@ File.init(
     sequelize,
     modelName: 'files',
     timestamps: true,
+    indexes: [{ fields: ['fileId'] }, { fields: ['folderId'] }],
   },
 );
 
@@ -173,7 +209,6 @@ export class FileAccess extends Model<
   declare id: CreationOptional<number>;
   declare fileId: number;
   declare userId: number;
-  declare access: 'private' | 'public';
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 }
@@ -201,12 +236,6 @@ FileAccess.init(
       },
       allowNull: false,
     },
-    access: {
-      type: DataTypes.ENUM,
-      values: ['private', 'public'],
-      defaultValue: 'private',
-      allowNull: false,
-    },
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE,
   },
@@ -214,6 +243,7 @@ FileAccess.init(
     sequelize,
     modelName: 'file_access',
     timestamps: true,
+    indexes: [{ fields: ['fileId', 'userId'] }],
   },
 );
 
