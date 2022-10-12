@@ -134,6 +134,7 @@ export class File extends Model<
   declare fileType: string;
   declare accessByLink: CreationOptional<'private' | 'public'>;
   declare lastViewed: CreationOptional<Date>;
+  declare timesViewed: CreationOptional<number>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
@@ -171,6 +172,7 @@ File.init(
     name: { type: DataTypes.STRING, allowNull: false },
     size: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       defaultValue: 0,
     },
     fileType: { type: DataTypes.STRING, allowNull: false },
@@ -183,6 +185,11 @@ File.init(
     lastViewed: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
+    },
+    timesViewed: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE,

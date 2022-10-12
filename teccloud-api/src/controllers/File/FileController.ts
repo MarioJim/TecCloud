@@ -70,11 +70,11 @@ class FileController {
     return async (req: Request, res: Response) => {
       const { fileId } = req.params;
       const { userId } = req;
-      if (!fileId || fileId.length !== 32 || !userId) {
+      if (!fileId || !userId) {
         return res.sendStatus(404);
       }
 
-      const fileInfo = await File.findOne({ where: { fileId } });
+      let fileInfo = await File.findOne({ where: { fileId } });
       if (!fileInfo) {
         return res.sendStatus(404);
       }
@@ -88,6 +88,9 @@ class FileController {
         path.join(process.env.FILES_FOLDER as string, fileId),
       );
       if (fs.existsSync(fileInServer)) {
+        fileInfo.lastViewed = new Date();
+        fileInfo.timesViewed += 1;
+        fileInfo = await fileInfo.save();
         const originalName = utf8_to_iso88591(fileInfo.name);
         res.set('Content-Disposition', `inline; filename="${originalName}"`);
         res.contentType(fileInfo.fileType);
