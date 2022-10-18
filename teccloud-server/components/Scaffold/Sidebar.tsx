@@ -9,6 +9,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SidebarItem from './SidebarItem';
 import SidebarLogout from './SidebarLogout';
+import SidebarUpload from './SidebarUpload';
 
 const Sidebar = () => (
   <Drawer
@@ -24,6 +25,10 @@ const Sidebar = () => (
   >
     <Toolbar />
     <Box sx={{ overflow: 'auto' }}>
+      <List>
+        <SidebarUpload />
+      </List>
+      <Divider />
       <List>
         <SidebarItem
           path='/files'

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Fragment, useCallback, useState } from 'react';
 import Head from 'next/head';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import { useDropzone } from 'react-dropzone';
@@ -87,6 +88,7 @@ const Files: AuthenticatedPage = ({ user }) => {
     onDragEnter: (e) =>
       setNumberDraggedFiles(e.dataTransfer?.items.length || 0),
     noKeyboard: true,
+    noClick: true,
   });
 
   return (
@@ -101,7 +103,9 @@ const Files: AuthenticatedPage = ({ user }) => {
           sx={{ width: '100%', minHeight: 'calc(100vh - 112px)' }}
           {...getRootProps()}
         >
-          <Typography paragraph>My files...</Typography>
+          <Typography paragraph>
+            Oops...you don't have any files yet.
+          </Typography>
           <input {...getInputProps()} />
           <Typography paragraph>
             Drop a file here, or click to select a file to upload!
