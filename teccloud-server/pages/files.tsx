@@ -1,6 +1,6 @@
 import type { GetServerSideUser, AuthenticatedPage, User } from '../types';
 import axios from 'axios';
-import { Fragment, useCallback, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import Head from 'next/head';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -8,10 +8,13 @@ import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import { useDropzone } from 'react-dropzone';
 import Scaffold from '../components/Scaffold';
+import Stack from '@mui/material/Stack';
 import UploadModal from '../components/UploadModal';
 import UploadStatusDialog, {
   UploadStatus,
 } from '../components/UploadStatusDialog';
+import IconButton from '@mui/material/IconButton';
+import SingleFile from '../components/SingleFile';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
   const res = await fetch('http://localhost:3001/user/auth', {
@@ -37,9 +40,26 @@ export const getServerSideProps: GetServerSideUser = async (ctx) => {
 const Files: AuthenticatedPage = ({ user }) => {
   const [numberDraggedFiles, setNumberDraggedFiles] = useState<number>(0);
   const [lastFilesDropped, setLastFilesDropped] = useState<any[]>([]);
+  const [folderFiles, setFolderFiles] = useState<any[]>([]);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     status: 'initial',
   });
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      const filesResponse = await fetch(
+        `http://localhost:3001/files/${user.folderId}`,
+        {
+          method: 'get',
+          credentials: 'include',
+        },
+      );
+      const filesJson = await filesResponse.json();
+      setFolderFiles(filesJson);
+    };
+
+    fetchFiles().catch(console.error);
+  }, []);
 
   const onUploadProgress = useCallback((e: ProgressEvent) => {
     const percentage = (100 * e.loaded) / e.total;
@@ -100,29 +120,29 @@ const Files: AuthenticatedPage = ({ user }) => {
         <UploadModal open={isDragActive} numberFiles={numberDraggedFiles} />
         <UploadStatusDialog status={uploadStatus} setStatus={setUploadStatus} />
         <Box
-          sx={{ width: '100%', minHeight: 'calc(100vh - 112px)' }}
+          sx={{
+            maxWidth: 'calc(100vw - 300px)',
+            minHeight: 'calc(100vh - 112px)',
+          }}
           {...getRootProps()}
         >
-          <Typography paragraph>
-            Oops...you don't have any files yet.
-          </Typography>
-          <input {...getInputProps()} />
-          <Typography paragraph>
-            Drop a file here, or click to select a file to upload!
-          </Typography>
-          {lastFilesDropped.map((file, i) => (
-            <div key={i}>
-              <Typography paragraph>Uploaded file</Typography>
-              <pre>{JSON.stringify(file, null, 2)}</pre>
-              <Link
-                target='_blank'
-                href={`http://localhost:3001/files/download/${file.fileId}`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                Download
-              </Link>
-            </div>
-          ))}
+          {folderFiles.length == 0 ? (
+            <>
+              <Typography paragraph>
+                Oops...you don't have any files yet.
+              </Typography>
+              <input {...getInputProps()} />
+              <Typography paragraph>
+                Drop a file here, or click to select a file to upload!
+              </Typography>
+            </>
+          ) : (
+            folderFiles.map((file, i) => (
+              <div key={i}>
+                <SingleFile fileId={file.fileId} fileName={file.name} />
+              </div>
+            ))
+          )}
         </Box>
       </Scaffold>
     </Fragment>

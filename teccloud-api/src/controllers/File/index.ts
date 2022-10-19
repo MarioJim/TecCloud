@@ -14,5 +14,6 @@ const router = Router({ mergeParams: true });
 
 router.post('/upload', auth, FileController.upload(multerInstance));
 router.get('/download/:fileId', auth, FileController.download());
+router.get('/:folderId', auth, FileController.get());
 
 export default router;

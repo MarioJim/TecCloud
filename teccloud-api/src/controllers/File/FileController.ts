@@ -2,12 +2,17 @@ import fs from 'fs';
 import path from 'path';
 import { Response, RequestHandler, Request } from 'express';
 import { Multer, MulterError } from 'multer';
-import { File } from '../../db';
+import { File, FileAccess } from '../../db';
 import { iso88591_to_utf8, utf8_to_iso88591 } from '../../utils/encoding';
 
 class FileController {
   public upload(multerInstance: Multer): RequestHandler {
     return async (req: Request, res: Response) => {
+      const { userId } = req;
+      if (!userId) {
+        return res.sendStatus(404);
+      }
+
       multerInstance.array('files')(req, res, (error) => {
         if (error instanceof MulterError) {
           if (error.code === 'LIMIT_FILE_SIZE') {
@@ -97,6 +102,25 @@ class FileController {
         res.sendFile(fileInServer);
       } else {
         res.sendStatus(500);
+      }
+    };
+  }
+
+  public get(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { userId } = req;
+      if (!userId) {
+        return res.sendStatus(404);
+      }
+
+      let files = await File.findAll(/*{ where: {folderId: userId} }*/);
+      if (!files) {
+        return res.sendStatus(404);
+      } else {
+        console.log('success');
+        console.log(files);
+        console.log('success');
+        res.json(files);
       }
     };
   }
