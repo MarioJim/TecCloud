@@ -207,7 +207,7 @@ export class FileAccess extends Model<
   InferCreationAttributes<FileAccess>
 > {
   declare id: CreationOptional<number>;
-  declare fileId: number;
+  declare fileId: string;
   declare userId: number;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
@@ -221,7 +221,7 @@ FileAccess.init(
       primaryKey: true,
     },
     fileId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       references: {
         model: File,
         key: 'id',
@@ -252,7 +252,7 @@ export class Page extends Model<
   InferCreationAttributes<Page>
 > {
   declare id: CreationOptional<number>;
-  declare fileId: number;
+  declare fileId: string;
   declare number: number;
   declare thumbnailPath: string;
   declare content: string;
@@ -268,7 +268,7 @@ Page.init(
       primaryKey: true,
     },
     fileId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       references: {
         model: File,
         key: 'id',
