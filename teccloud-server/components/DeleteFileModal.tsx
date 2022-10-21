@@ -8,12 +8,25 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 
 interface DeleteFileModalProps {
+  fileId: string;
   filename: string;
 }
 
-const DeleteFileModal = ({ filename }: DeleteFileModalProps) => {
+const DeleteFileModal = ({ fileId, filename }: DeleteFileModalProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const handleClose = () => setOpen(false);
+
+  const deleteFile = async () => {
+    try {
+      await fetch(`http://localhost:3001/files/${fileId}`, {
+        method: 'delete',
+        credentials: 'include',
+      });
+      location.assign('/files');
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <>
@@ -55,7 +68,7 @@ const DeleteFileModal = ({ filename }: DeleteFileModalProps) => {
               alignItems='center'
               spacing={1}
             >
-              <Button variant='contained' color='error'>
+              <Button variant='contained' color='error' onClick={deleteFile}>
                 Yes, delete now
               </Button>
               <Button variant='contained' color='primary' onClick={handleClose}>

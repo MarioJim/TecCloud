@@ -124,6 +124,43 @@ class FileController {
       }
     };
   }
+
+  public delete(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { fileId } = req.params;
+      const { userId } = req;
+      if (!fileId || !userId) {
+        return res.sendStatus(404);
+      }
+
+      let fileInfo = await File.findOne({ where: { fileId } });
+      if (!fileInfo) {
+        return res.sendStatus(404);
+      }
+
+      const accessableByUser = await fileInfo.accessableBy(userId);
+      if (!accessableByUser) {
+        return res.sendStatus(401);
+      }
+
+      const fileInServer = path.resolve(
+        path.join(process.env.FILES_FOLDER as string, fileId),
+      );
+
+      try {
+        fs.unlinkSync(fileInServer);
+        await fileInfo.destroy();
+
+        res.status(200).send({
+          message: 'File deleted.',
+        });
+      } catch (err) {
+        res.status(500).send({
+          message: 'Could not delete the file. ' + err,
+        });
+      }
+    };
+  }
 }
 
 export default new FileController();

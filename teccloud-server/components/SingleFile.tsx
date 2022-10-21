@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 import DeleteFileModal from './DeleteFileModal';
 
 interface SingleFileProps {
-  fileId: number;
+  fileId: string;
   fileName: string;
 }
 
@@ -40,7 +40,7 @@ const SingleFile = ({ fileId, fileName }: SingleFileProps) => {
           {fileName}
         </Typography>
         <Stack direction='row' justifyContent='flex-end' sx={{ width: 0.4 }}>
-          <DeleteFileModal filename={fileName} />
+          <DeleteFileModal fileId={fileId} filename={fileName} />
         </Stack>
       </Stack>
     </Box>
