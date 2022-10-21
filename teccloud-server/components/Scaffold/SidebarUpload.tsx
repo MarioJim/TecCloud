@@ -37,6 +37,7 @@ const SidebarUpload: AuthenticatedPage = ({ user }) => {
           { withCredentials: true, onUploadProgress },
         );
         setLastFilesDropped(response.data.files);
+        location.assign('/files');
       } catch (e: any) {
         if (e.response.status === 413) {
           setUploadStatus({
