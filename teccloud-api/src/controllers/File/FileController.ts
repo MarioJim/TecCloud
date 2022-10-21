@@ -1,9 +1,9 @@
 import fs from 'fs';
-import path from 'path';
 import { Response, RequestHandler, Request } from 'express';
 import { Multer, MulterError } from 'multer';
 import { File, FileAccess } from '../../db';
 import { iso88591_to_utf8, utf8_to_iso88591 } from '../../utils/encoding';
+import { get_file_in_server_path } from '../../utils/files';
 
 class FileController {
   public upload(multerInstance: Multer): RequestHandler {
@@ -89,9 +89,7 @@ class FileController {
         return res.sendStatus(401);
       }
 
-      const fileInServer = path.resolve(
-        path.join(process.env.FILES_FOLDER as string, fileId),
-      );
+      const fileInServer = get_file_in_server_path(fileId);
       if (fs.existsSync(fileInServer)) {
         fileInfo.lastViewed = new Date();
         fileInfo.timesViewed += 1;
@@ -143,10 +141,7 @@ class FileController {
         return res.sendStatus(401);
       }
 
-      const fileInServer = path.resolve(
-        path.join(process.env.FILES_FOLDER as string, fileId),
-      );
-
+      const fileInServer = get_file_in_server_path(fileId);
       try {
         fs.unlinkSync(fileInServer);
         await fileInfo.destroy();
