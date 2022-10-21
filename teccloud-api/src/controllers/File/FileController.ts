@@ -1,9 +1,9 @@
 import fs from 'fs';
-import path from 'path';
 import { Response, RequestHandler, Request } from 'express';
 import { Multer, MulterError } from 'multer';
 import { File, FileAccess } from '../../db';
 import { iso88591_to_utf8, utf8_to_iso88591 } from '../../utils/encoding';
+import { get_file_in_server_path } from '../../utils/files';
 
 class FileController {
   public upload(multerInstance: Multer): RequestHandler {
@@ -89,9 +89,7 @@ class FileController {
         return res.sendStatus(401);
       }
 
-      const fileInServer = path.resolve(
-        path.join(process.env.FILES_FOLDER as string, fileId),
-      );
+      const fileInServer = get_file_in_server_path(fileId);
       if (fs.existsSync(fileInServer)) {
         fileInfo.lastViewed = new Date();
         fileInfo.timesViewed += 1;
@@ -121,6 +119,40 @@ class FileController {
         console.log(files);
         console.log('success');
         res.json(files);
+      }
+    };
+  }
+
+  public delete(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { fileId } = req.params;
+      const { userId } = req;
+      if (!fileId || !userId) {
+        return res.sendStatus(404);
+      }
+
+      let fileInfo = await File.findOne({ where: { fileId } });
+      if (!fileInfo) {
+        return res.sendStatus(404);
+      }
+
+      const accessableByUser = await fileInfo.accessableBy(userId);
+      if (!accessableByUser) {
+        return res.sendStatus(401);
+      }
+
+      const fileInServer = get_file_in_server_path(fileId);
+      try {
+        fs.unlinkSync(fileInServer);
+        await fileInfo.destroy();
+
+        res.status(200).send({
+          message: 'File deleted.',
+        });
+      } catch (err) {
+        res.status(500).send({
+          message: 'Could not delete the file. ' + err,
+        });
       }
     };
   }

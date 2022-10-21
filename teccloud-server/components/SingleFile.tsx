@@ -3,9 +3,10 @@ import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import DeleteFileModal from './DeleteFileModal';
 
 interface SingleFileProps {
-  fileId: number;
+  fileId: string;
   fileName: string;
 }
 
@@ -35,9 +36,12 @@ const SingleFile = ({ fileId, fileName }: SingleFileProps) => {
         >
           <DownloadForOfflineIcon fontSize='inherit' />
         </IconButton>
-        <Typography fontFamily={'Verdana'} noWrap>
+        <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
           {fileName}
         </Typography>
+        <Stack direction='row' justifyContent='flex-end' sx={{ width: 0.4 }}>
+          <DeleteFileModal fileId={fileId} filename={fileName} />
+        </Stack>
       </Stack>
     </Box>
   );

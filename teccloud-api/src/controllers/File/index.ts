@@ -13,6 +13,7 @@ const multerInstance = multer({
 const router = Router({ mergeParams: true });
 
 router.post('/upload', auth, FileController.upload(multerInstance));
+router.delete('/:fileId', auth, FileController.delete());
 router.get('/download/:fileId', auth, FileController.download());
 router.get('/:folderId', auth, FileController.get());
 
