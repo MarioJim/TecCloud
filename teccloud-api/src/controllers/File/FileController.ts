@@ -2,10 +2,11 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { Response, RequestHandler, Request } from 'express';
 import { Multer, MulterError } from 'multer';
-import { File, FileAccess, Folder, User } from '../../db';
+import { Op } from 'sequelize';
+import { File, Folder, User } from '../../db';
 import { iso88591_to_utf8, utf8_to_iso88591 } from '../../utils/encoding';
 import { get_file_server_path } from '../../utils/files';
-import { Op } from 'sequelize';
+import { channel } from '../../queue';
 
 class FileController {
   public upload(multerInstance: Multer): RequestHandler {
@@ -80,15 +81,17 @@ class FileController {
 
         files = files.filter((file) => !duplicateNames.has(file.originalname));
         Promise.all(
-          files.map((file) =>
-            File.create({
+          files.map(async (file) => {
+            const fileInDB = await File.create({
               fileName: file.filename,
               originalName: iso88591_to_utf8(file.originalname),
               folderId: folderId,
               size: file.size,
               fileType: file.mimetype,
-            }),
-          ),
+            });
+            (await channel).queueFile(fileInDB);
+            return fileInDB;
+          }),
         )
           .then(async (savedFiles) => {
             await user.addFiles(savedFiles, {

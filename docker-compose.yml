@@ -4,7 +4,7 @@ services:
   server:
     build: ./teccloud-server
     ports:
-      - '3000:3000'
+      - 3000:3000
     environment:
       - API_SERVER_URL=http://api:3001
     depends_on:
@@ -13,27 +13,81 @@ services:
   api:
     build: ./teccloud-api
     ports:
-      - '3001:3001'
+      - 3001:3001
     environment:
-      - PG_HOST=database
-      - PG_USER=teccloudapi
-      - PG_PASSWORD=verysecretpasswordfordb
-      - PG_DATABASE=teccloud_db
+      - POSTGRES_HOST=database
+      - RABBITMQ_HOST=queue
+    env_file:
+      - config/postgres.env
+      - config/rabbitmq.env
     volumes:
-      - ./teccloud-api/userfiles:/app/userfiles
+      - user_files:/app/userfiles
     depends_on:
       - database
+      - queue
+
+  text-extractor:
+    build:
+      context: .
+      dockerfile: ./teccloud-text-extractor/Dockerfile
+    environment:
+      - RUST_LOG=info
+      - POSTGRES_HOST=database
+      - RABBITMQ_HOST=queue
+    env_file:
+      - config/postgres.env
+      - config/rabbitmq.env
+    volumes:
+      - user_files:/app/userfiles
+    depends_on:
+      - api
+      - database
+      - queue
+
+  thumbnail-generator:
+    build:
+      context: .
+      dockerfile: ./teccloud-thumbnail-generator/Dockerfile
+    environment:
+      - RUST_LOG=info
+      - POSTGRES_HOST=database
+      - RABBITMQ_HOST=queue
+    env_file:
+      - config/postgres.env
+      - config/rabbitmq.env
+    volumes:
+      - user_files:/app/userfiles
+    depends_on:
+      - api
+      - database
+      - queue
 
   database:
-    image: 'postgres:14'
+    image: postgres:15
     ports:
-      - '5432:5432'
-    environment:
-      - POSTGRES_USER=teccloudapi
-      - POSTGRES_PASSWORD=verysecretpasswordfordb
-      - POSTGRES_DB=teccloud_db
+      - 5432:5432
+    env_file:
+      - config/postgres.env
     volumes:
-      - teccloud_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
+
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   ports:
+  #     - 5050:80
+  #   restart: always
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: root
+
+  queue:
+    image: rabbitmq:3-management
+    ports:
+      - 15672:15672
+      - 5672:5672
+    env_file:
+      - config/rabbitmq.env
 
 volumes:
-  teccloud_data:
+  pg_data:
+  user_files:

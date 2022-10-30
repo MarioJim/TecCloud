@@ -1,0 +1,7 @@
+.git/
+target/
+teccloud-api/node_modules/
+teccloud-api/userfiles/
+teccloud-api/teccloud.sqlite
+teccloud-server/node_modules/
+teccloud-server/.next/

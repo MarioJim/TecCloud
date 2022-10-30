@@ -9,6 +9,7 @@ import { port, websiteServer } from './config';
 import FileRoutes from './controllers/File';
 import FolderRoutes from './controllers/Folder';
 import UserRoutes from './controllers/User';
+import { channel } from './queue';
 
 const app = express();
 app.use(bodyParser.json());
@@ -22,6 +23,7 @@ app.use('/files', FileRoutes);
 app.use('/folder', FolderRoutes);
 
 (async () => {
+  await channel;
   await sequelize.sync({ force: true });
 
   app.listen(port, () => {

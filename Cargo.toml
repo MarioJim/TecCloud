@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "teccloud-shared-rust",
+    "teccloud-text-extractor",
+    "teccloud-thumbnail-generator",
+]

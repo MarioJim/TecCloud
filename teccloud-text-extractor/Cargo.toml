@@ -1,0 +1,15 @@
+[package]
+name = "teccloud-text-extractor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+lapin = "2.1"
+futures-lite = "1.12"
+poppler-rs = "0.20"
+teccloud-shared-rust = { path = "../teccloud-shared-rust" }
+tesseract = "0.12"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
