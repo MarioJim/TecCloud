@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import Backdrop from '@mui/material/Backdrop';
 import Box from '@mui/material/Box';
 import Fade from '@mui/material/Fade';
 import Modal from '@mui/material/Modal';
@@ -8,17 +7,17 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 
 interface DeleteFileModalProps {
-  fileId: string;
-  filename: string;
+  fileName: string;
+  originalName: string;
 }
 
-const DeleteFileModal = ({ fileId, filename }: DeleteFileModalProps) => {
+const DeleteFileModal = ({ fileName, originalName }: DeleteFileModalProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const handleClose = () => setOpen(false);
 
   const deleteFile = async () => {
     try {
-      await fetch(`http://localhost:3001/files/${fileId}`, {
+      await fetch(`http://localhost:3001/files/${fileName}`, {
         method: 'delete',
         credentials: 'include',
       });
@@ -60,7 +59,7 @@ const DeleteFileModal = ({ fileId, filename }: DeleteFileModalProps) => {
               fontStyle='italic'
               sx={{ my: 4 }}
             >
-              {filename}
+              {originalName}
             </Typography>
             <Stack
               direction='row'

@@ -1,4 +1,3 @@
-import React from 'react';
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -11,7 +10,11 @@ import SidebarItem from './SidebarItem';
 import SidebarLogout from './SidebarLogout';
 import SidebarUpload from './SidebarUpload';
 
-const Sidebar = () => (
+interface SidebarProps {
+  folderId?: number;
+}
+
+const Sidebar = ({ folderId }: SidebarProps) => (
   <Drawer
     variant='permanent'
     sx={{
@@ -25,9 +28,11 @@ const Sidebar = () => (
   >
     <Toolbar />
     <Box sx={{ overflow: 'auto' }}>
-      <List>
-        <SidebarUpload />
-      </List>
+      {folderId !== undefined && (
+        <List>
+          <SidebarUpload folderId={folderId} />
+        </List>
+      )}
       <Divider />
       <List>
         <SidebarItem

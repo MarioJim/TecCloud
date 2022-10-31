@@ -1,16 +1,16 @@
-import type { AuthenticatedPage, User } from '../../types';
-import React from 'react';
 import { useCallback, useState } from 'react';
 import axios from 'axios';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Button from '@mui/material/Button';
-import Files from '../../pages/files';
 import ListItem from '@mui/material/ListItem';
 import UploadStatusDialog, { UploadStatus } from '../UploadStatusDialog';
 import { useDropzone } from 'react-dropzone';
 
-const SidebarUpload: AuthenticatedPage = ({ user }) => {
-  const [lastFilesDropped, setLastFilesDropped] = useState<any[]>([]);
+interface SidebarUploadProps {
+  folderId: number;
+}
+
+const SidebarUpload = ({ folderId }: SidebarUploadProps) => {
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     status: 'initial',
   });
@@ -27,16 +27,14 @@ const SidebarUpload: AuthenticatedPage = ({ user }) => {
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       const formData = new FormData();
-      formData.set('folderId', `1`);
+      formData.set('folderId', `${folderId}`);
       acceptedFiles.forEach((file) => formData.append('files', file));
 
       try {
-        const response = await axios.post(
-          'http://localhost:3001/files/upload',
-          formData,
-          { withCredentials: true, onUploadProgress },
-        );
-        setLastFilesDropped(response.data.files);
+        await axios.post('http://localhost:3001/files/upload', formData, {
+          withCredentials: true,
+          onUploadProgress,
+        });
         location.assign('/files');
       } catch (e: any) {
         if (e.response.status === 413) {
@@ -55,7 +53,7 @@ const SidebarUpload: AuthenticatedPage = ({ user }) => {
         console.error('Error uploading files:', e);
       }
     },
-    [onUploadProgress, /*user.folderId=*/ 1],
+    [onUploadProgress, folderId],
   );
 
   const { getInputProps, getRootProps, open } = useDropzone({
