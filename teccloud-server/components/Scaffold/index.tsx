@@ -7,10 +7,11 @@ import { User } from '../../types';
 
 interface ScaffoldProps {
   user: User;
+  folderId?: number;
   children: React.ReactNode;
 }
 
-const Scaffold = ({ children, user }: ScaffoldProps) => (
+const Scaffold = ({ children, user, folderId }: ScaffoldProps) => (
   <Box sx={{ display: 'flex' }}>
     <AppBar
       position='fixed'
@@ -26,7 +27,7 @@ const Scaffold = ({ children, user }: ScaffoldProps) => (
         </Typography>
       </Toolbar>
     </AppBar>
-    <Sidebar />
+    <Sidebar folderId={folderId} />
     <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
       <Toolbar />
       {children}
