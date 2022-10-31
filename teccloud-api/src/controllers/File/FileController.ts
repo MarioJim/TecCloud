@@ -1,9 +1,9 @@
 import fs from 'fs';
 import { Response, RequestHandler, Request } from 'express';
 import { Multer, MulterError } from 'multer';
-import { File, FileAccess } from '../../db';
+import { File } from '../../db';
 import { iso88591_to_utf8, utf8_to_iso88591 } from '../../utils/encoding';
-import { get_file_in_server_path } from '../../utils/files';
+import { get_file_server_path } from '../../utils/files';
 
 class FileController {
   public upload(multerInstance: Multer): RequestHandler {
@@ -46,8 +46,8 @@ class FileController {
         Promise.all(
           files.map((file) =>
             File.create({
-              fileId: file.filename,
-              name: iso88591_to_utf8(file.originalname),
+              fileName: file.filename,
+              originalName: iso88591_to_utf8(file.originalname),
               folderId: folderId,
               size: file.size,
               fileType: file.mimetype,
@@ -73,13 +73,13 @@ class FileController {
 
   public download(): RequestHandler {
     return async (req: Request, res: Response) => {
-      const { fileId } = req.params;
+      const { fileName } = req.params;
       const { userId } = req;
-      if (!fileId || !userId) {
+      if (!fileName || !userId) {
         return res.sendStatus(404);
       }
 
-      let fileInfo = await File.findOne({ where: { fileId } });
+      let fileInfo = await File.findOne({ where: { fileName } });
       if (!fileInfo) {
         return res.sendStatus(404);
       }
@@ -89,12 +89,12 @@ class FileController {
         return res.sendStatus(401);
       }
 
-      const fileInServer = get_file_in_server_path(fileId);
+      const fileInServer = get_file_server_path(fileName);
       if (fs.existsSync(fileInServer)) {
         fileInfo.lastViewed = new Date();
         fileInfo.timesViewed += 1;
         fileInfo = await fileInfo.save();
-        const originalName = utf8_to_iso88591(fileInfo.name);
+        const originalName = utf8_to_iso88591(fileInfo.originalName);
         res.set('Content-Disposition', `inline; filename="${originalName}"`);
         res.contentType(fileInfo.fileType);
         res.sendFile(fileInServer);
@@ -106,32 +106,30 @@ class FileController {
 
   public get(): RequestHandler {
     return async (req: Request, res: Response) => {
+      const { folderId } = req.params;
       const { userId } = req;
       if (!userId) {
         return res.sendStatus(404);
       }
 
-      let files = await File.findAll(/*{ where: {folderId: userId} }*/);
-      if (!files) {
-        return res.sendStatus(404);
-      } else {
-        console.log('success');
-        console.log(files);
-        console.log('success');
+      const files = await File.findAll({ where: { folderId } });
+      if (files) {
         res.json(files);
+      } else {
+        res.sendStatus(404);
       }
     };
   }
 
   public delete(): RequestHandler {
     return async (req: Request, res: Response) => {
-      const { fileId } = req.params;
+      const { fileName } = req.params;
       const { userId } = req;
-      if (!fileId || !userId) {
+      if (!fileName || !userId) {
         return res.sendStatus(404);
       }
 
-      let fileInfo = await File.findOne({ where: { fileId } });
+      const fileInfo = await File.findOne({ where: { fileName } });
       if (!fileInfo) {
         return res.sendStatus(404);
       }
@@ -141,7 +139,7 @@ class FileController {
         return res.sendStatus(401);
       }
 
-      const fileInServer = get_file_in_server_path(fileId);
+      const fileInServer = get_file_server_path(fileName);
       try {
         fs.unlinkSync(fileInServer);
         await fileInfo.destroy();
@@ -151,7 +149,7 @@ class FileController {
         });
       } catch (err) {
         res.status(500).send({
-          message: 'Could not delete the file. ' + err,
+          message: 'Could not delete the file.\n' + err,
         });
       }
     };

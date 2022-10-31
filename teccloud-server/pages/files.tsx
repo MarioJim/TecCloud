@@ -3,17 +3,13 @@ import axios from 'axios';
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import Head from 'next/head';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import { useDropzone } from 'react-dropzone';
 import Scaffold from '../components/Scaffold';
-import Stack from '@mui/material/Stack';
 import UploadModal from '../components/UploadModal';
 import UploadStatusDialog, {
   UploadStatus,
 } from '../components/UploadStatusDialog';
-import IconButton from '@mui/material/IconButton';
 import SingleFile from '../components/SingleFile';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
@@ -139,9 +135,11 @@ const Files: AuthenticatedPage = ({ user }) => {
             </>
           ) : (
             folderFiles.map((file, i) => (
-              <div key={i}>
-                <SingleFile fileId={file.fileId} fileName={file.name} />
-              </div>
+              <SingleFile
+                key={file.id}
+                fileName={file.fileName}
+                originalName={file.originalName}
+              />
             ))
           )}
         </Box>
