@@ -35,7 +35,6 @@ export const getServerSideProps: GetServerSideUser = async (ctx) => {
 
 const Files: AuthenticatedPage = ({ user }) => {
   const [numberDraggedFiles, setNumberDraggedFiles] = useState<number>(0);
-  const [lastFilesDropped, setLastFilesDropped] = useState<any[]>([]);
   const [folderFiles, setFolderFiles] = useState<any[]>([]);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     status: 'initial',
@@ -55,7 +54,7 @@ const Files: AuthenticatedPage = ({ user }) => {
     };
 
     fetchFiles().catch(console.error);
-  }, []);
+  });
 
   const onUploadProgress = useCallback((e: ProgressEvent) => {
     const percentage = (100 * e.loaded) / e.total;
@@ -73,12 +72,10 @@ const Files: AuthenticatedPage = ({ user }) => {
       acceptedFiles.forEach((file) => formData.append('files', file));
 
       try {
-        const response = await axios.post(
-          'http://localhost:3001/files/upload',
-          formData,
-          { withCredentials: true, onUploadProgress },
-        );
-        setLastFilesDropped(response.data.files);
+        await axios.post('http://localhost:3001/files/upload', formData, {
+          withCredentials: true,
+          onUploadProgress,
+        });
         location.assign('/files');
       } catch (e: any) {
         if (e.response.status === 413) {
@@ -113,7 +110,7 @@ const Files: AuthenticatedPage = ({ user }) => {
       <Head>
         <title>Files - TecCloud</title>
       </Head>
-      <Scaffold user={user}>
+      <Scaffold user={user} folderId={user.folderId}>
         <UploadModal open={isDragActive} numberFiles={numberDraggedFiles} />
         <UploadStatusDialog status={uploadStatus} setStatus={setUploadStatus} />
         <Box
@@ -126,7 +123,7 @@ const Files: AuthenticatedPage = ({ user }) => {
           {folderFiles.length == 0 ? (
             <>
               <Typography paragraph>
-                Oops...you don't have any files yet.
+                Oops...you don&apos;t have any files yet.
               </Typography>
               <input {...getInputProps()} />
               <Typography paragraph>
@@ -134,7 +131,7 @@ const Files: AuthenticatedPage = ({ user }) => {
               </Typography>
             </>
           ) : (
-            folderFiles.map((file, i) => (
+            folderFiles.map((file) => (
               <SingleFile
                 key={file.id}
                 fileName={file.fileName}
