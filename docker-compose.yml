@@ -21,7 +21,7 @@ services:
       - config/postgres.env
       - config/rabbitmq.env
     volumes:
-      - user_files:/app/userfiles
+      - userfiles:/app/userfiles
     depends_on:
       - database
       - queue
@@ -38,7 +38,7 @@ services:
       - config/postgres.env
       - config/rabbitmq.env
     volumes:
-      - user_files:/app/userfiles
+      - userfiles:/app/userfiles
     depends_on:
       - api
       - database
@@ -56,7 +56,7 @@ services:
       - config/postgres.env
       - config/rabbitmq.env
     volumes:
-      - user_files:/app/userfiles
+      - userfiles:/app/userfiles
     depends_on:
       - api
       - database
@@ -69,7 +69,7 @@ services:
     env_file:
       - config/postgres.env
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
 
   # pgadmin:
   #   image: dpage/pgadmin4
@@ -87,7 +87,10 @@ services:
       - 5672:5672
     env_file:
       - config/rabbitmq.env
+    volumes:
+      - rmqdata:/var/lib/rabbitmq
 
 volumes:
-  pg_data:
-  user_files:
+  userfiles:
+  pgdata:
+  rmqdata:

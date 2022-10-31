@@ -41,8 +41,14 @@ async fn process_message(delivery: Delivery, pg_conn: &mut PostgresConnection) -
     let file_info = FileInfo::from_delivery(&delivery)?;
     debug!(?file_info, "Received file info");
 
-    let pages_text = extractor::extract_text(&file_info).await?;
-    debug!(pages = pages_text.len(), "Extracted text");
+    let pages_text = extractor::extract_text(&file_info)
+        .await
+        .with_context(|| format!("On file {}", file_info.file_id))?;
+    debug!(
+        pages = pages_text.len(),
+        first_page_size = pages_text.get(&1).map_or(0, |text| text.len()),
+        "Extracted text"
+    );
 
     pg_conn.store(file_info, pages_text).await?;
     debug!("Stored text");

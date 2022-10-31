@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use tokio::{net::TcpStream, time};
-use tracing::debug;
+use tracing::{debug, info};
 
 use crate::Config;
 
@@ -23,7 +23,7 @@ impl WaitForConnections {
         let pg_address = self.pg_address.clone();
         let pg_handle = tokio::spawn(async move {
             while TcpStream::connect(&pg_address).await.is_err() {
-                debug!("Failed to connect to Postgres");
+                info!("Failed to connect to Postgres");
                 time::sleep(time::Duration::from_secs(1)).await;
             }
             debug!("Postgres is up");
@@ -32,7 +32,7 @@ impl WaitForConnections {
         let rmq_address = self.rmq_address.clone();
         let rmq_handle = tokio::spawn(async move {
             while TcpStream::connect(&rmq_address).await.is_err() {
-                debug!("Failed to connect to RabbitMQ");
+                info!("Failed to connect to RabbitMQ");
                 time::sleep(time::Duration::from_secs(1)).await;
             }
             debug!("RabbitMQ is up");
