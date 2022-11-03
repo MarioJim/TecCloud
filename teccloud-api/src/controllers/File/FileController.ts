@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { Response, RequestHandler, Request } from 'express';
 import { Multer, MulterError } from 'multer';
-import { File } from '../../db';
+import { File, Folder, User } from '../../db';
 import { iso88591_to_utf8, utf8_to_iso88591 } from '../../utils/encoding';
 import { get_file_server_path } from '../../utils/files';
 
@@ -10,7 +10,7 @@ class FileController {
     return async (req: Request, res: Response) => {
       const { userId } = req;
       if (!userId) {
-        return res.sendStatus(404);
+        return res.sendStatus(401);
       }
 
       multerInstance.array('files')(req, res, (error) => {
@@ -84,8 +84,8 @@ class FileController {
         return res.sendStatus(404);
       }
 
-      const accessableByUser = await fileInfo.accessableBy(userId);
-      if (!accessableByUser) {
+      const user = await User.findByPk(userId);
+      if (!(user && (await fileInfo.accessableBy(user)))) {
         return res.sendStatus(401);
       }
 
@@ -108,15 +108,21 @@ class FileController {
     return async (req: Request, res: Response) => {
       const { folderId } = req.params;
       const { userId } = req;
-      if (!userId) {
+
+      const folder = await Folder.findByPk(folderId);
+      const user = await User.findByPk(userId);
+      if (!folder || !user) {
         return res.sendStatus(404);
       }
 
       const files = await File.findAll({ where: { folderId } });
-      if (files) {
+      if (await folder.isOwnedBy(user)) {
         res.json(files);
       } else {
-        res.sendStatus(404);
+        const filePermissions = await Promise.all(
+          files.map((file) => file.viewableBy(user)),
+        );
+        res.json(files.filter((_, i) => filePermissions[i]));
       }
     };
   }
@@ -126,7 +132,7 @@ class FileController {
       const { fileName } = req.params;
       const { userId } = req;
       if (!fileName || !userId) {
-        return res.sendStatus(404);
+        return res.sendStatus(401);
       }
 
       const fileInfo = await File.findOne({ where: { fileName } });
@@ -134,8 +140,8 @@ class FileController {
         return res.sendStatus(404);
       }
 
-      const accessableByUser = await fileInfo.accessableBy(userId);
-      if (!accessableByUser) {
+      const user = await User.findByPk(userId);
+      if (!(user && (await fileInfo.ownedBy(user)))) {
         return res.sendStatus(401);
       }
 

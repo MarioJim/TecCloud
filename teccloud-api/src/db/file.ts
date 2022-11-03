@@ -23,17 +23,21 @@ export class File extends Model<
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
-  async accessableBy(userId: number): Promise<boolean> {
+  async accessableBy(user: User): Promise<boolean> {
+    return (await this.ownedBy(user)) || (await this.viewableBy(user));
+  }
+
+  async ownedBy(user: User): Promise<boolean> {
+    const folder = await Folder.findByPk(this.folderId);
+    return folder?.isOwnedBy(user) || false;
+  }
+
+  async viewableBy(user: User): Promise<boolean> {
     if (this.accessByLink === 'public') {
       return true;
     }
-    const user = await User.findByPk(userId);
-    const folder = await Folder.findByPk(this.folderId);
-    if ((user && folder?.isOwnedBy(user)) || false) {
-      return true;
-    }
     const access = await FileAccess.findOne({
-      where: { fileId: this.id, userId },
+      where: { fileId: this.id, userId: user.id },
     });
     return access !== null;
   }
