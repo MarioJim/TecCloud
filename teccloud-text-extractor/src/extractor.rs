@@ -10,6 +10,7 @@ use tokio::{
     process::Command,
 };
 use tracing::{debug, debug_span, info, trace};
+use url::Url;
 
 pub async fn extract_text(file_info: &FileInfo) -> Result<PageContents> {
     let extracting_text_span = debug_span!("Extracting text");
@@ -17,7 +18,7 @@ pub async fn extract_text(file_info: &FileInfo) -> Result<PageContents> {
 
     let file_path = canonicalize(format!("./userfiles/{}", file_info.file_id)).await?;
 
-    match file_info.file_type.as_str() {
+    let page_contents = match file_info.file_type.as_str() {
         filetype if filetype.starts_with("text/") => extract_from_text(&file_path).await,
         "application/pdf" => extract_from_pdf(&file_path),
         "image/jpeg" | "image/png" => extract_from_image(&file_path),
@@ -33,7 +34,15 @@ pub async fn extract_text(file_info: &FileInfo) -> Result<PageContents> {
             info!("type {} not recognized", other);
             Ok(PageContents::default())
         }
-    }
+    }?;
+
+    debug!(
+        pages = page_contents.len(),
+        first_page_size = page_contents.get(&1).map_or(0, |text| text.len()),
+        "Extracted text"
+    );
+
+    Ok(page_contents)
 }
 
 async fn extract_from_text(file_path: &Path) -> Result<PageContents> {
@@ -51,8 +60,10 @@ async fn extract_from_text(file_path: &Path) -> Result<PageContents> {
 
 fn extract_from_pdf(file_path: &Path) -> Result<PageContents> {
     debug!("Extracting text from PDF");
-    let file_path = format!("file://{}", file_path.to_string_lossy());
-    let document = Document::from_file(&file_path, None)?;
+    let Ok(file_path) = Url::from_file_path(file_path) else {
+        anyhow::bail!("Canonicalized file path is not absolute");
+    };
+    let document = Document::from_file(file_path.as_str(), None)?;
     let page_contents = (0..document.n_pages())
         .filter_map(|page_idx| {
             document

@@ -84,6 +84,10 @@ impl PostgresConnection {
 
         tx.commit()
             .await
-            .context("Committing a transaction to Postgres")
+            .context("Committing a transaction to Postgres")?;
+
+        debug!("Stored data in Postgres");
+
+        Ok(())
     }
 }

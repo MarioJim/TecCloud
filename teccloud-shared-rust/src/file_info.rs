@@ -1,5 +1,4 @@
 use anyhow::{Context, Result};
-use lapin::message::Delivery;
 
 #[derive(Debug)]
 pub struct FileInfo {
@@ -8,9 +7,11 @@ pub struct FileInfo {
     pub file_type: String,
 }
 
-impl FileInfo {
-    pub fn from_delivery(delivery: &Delivery) -> Result<Self> {
-        serde_json::from_slice::<'_, serde_json::Value>(&delivery.data)
+impl TryFrom<&[u8]> for FileInfo {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        serde_json::from_slice::<'_, serde_json::Value>(value)
             .context("Parsing the JSON message")
             .and_then(FileInfo::try_from)
     }
@@ -26,9 +27,10 @@ impl TryFrom<serde_json::Value> for FileInfo {
         };
 
         let id = match map.remove("id") {
-            Some(serde_json::Value::Number(id)) if id.is_i64() => {
-                id.as_i64().unwrap().try_into().unwrap()
-            }
+            Some(serde_json::Value::Number(id)) if id.is_i64() => id
+                .as_i64()
+                .context("'id' doesn't fit in an i64")?
+                .try_into()?,
             Some(_) => anyhow::bail!("Invalid datatype for key 'id'"),
             None => anyhow::bail!("Key 'id' not found"),
         };

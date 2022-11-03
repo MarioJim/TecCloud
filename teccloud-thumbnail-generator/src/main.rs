@@ -1,6 +1,6 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use futures_lite::StreamExt;
-use lapin::{message::Delivery, options::BasicAckOptions};
+use lapin::options::BasicAckOptions;
 use teccloud_shared_rust::{
     conn::{RabbitMQConnection, WaitForConnections},
     Config,
@@ -21,8 +21,11 @@ async fn main() -> Result<()> {
     let mut consumer = rmq_conn.create_consumer(&mut shutdown_signal).await?;
 
     while let Some(delivery) = consumer.next().await {
-        if let Err(error) = process_message(delivery).await {
+        if let Err(error) = process_message(&delivery.data).await {
             error!(?error, "Error processing message");
+        }
+        if let Err(error) = delivery.ack(BasicAckOptions::default()).await {
+            error!(?error, "Error ack'ing message");
         }
     }
 
@@ -31,11 +34,11 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn process_message(delivery: Delivery) -> Result<()> {
+async fn process_message(data: &[u8]) -> Result<()> {
     let processing_file_span = debug_span!("Processing message");
     let _enter = processing_file_span.enter();
 
-    let file_info = FileInfo::from_delivery(&delivery)?;
+    let file_info = FileInfo::try_from(data)?;
     debug!(?file_info, "Received file info");
 
     error!(
@@ -43,8 +46,5 @@ async fn process_message(delivery: Delivery) -> Result<()> {
         file_info.file_id
     );
 
-    delivery
-        .ack(BasicAckOptions::default())
-        .await
-        .context("Ack'ing delivery")
+    Ok(())
 }
