@@ -1,16 +1,17 @@
-import type { GetServerSideUser, AuthenticatedPage, User } from '../types';
+import type { GetServerSideUser, AuthenticatedPage, User } from '../../types';
 import axios from 'axios';
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useDropzone } from 'react-dropzone';
-import Scaffold from '../components/Scaffold';
-import UploadModal from '../components/UploadModal';
+import Scaffold from '../../components/Scaffold';
+import UploadModal from '../../components/UploadModal';
 import UploadStatusDialog, {
   UploadStatus,
-} from '../components/UploadStatusDialog';
-import SingleFile from '../components/SingleFile';
+} from '../../components/UploadStatusDialog';
+import SingleFile from '../../components/SingleFile';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
   const res = await fetch('http://localhost:3001/user/auth', {
@@ -34,6 +35,15 @@ export const getServerSideProps: GetServerSideUser = async (ctx) => {
 };
 
 const Files: AuthenticatedPage = ({ user }) => {
+  const router = useRouter();
+  const { folderId: maybeFolderId } = router.query;
+  const folderId = parseInt((maybeFolderId as string | undefined) || '');
+  useEffect(() => {
+    if (isNaN(folderId)) {
+      router.push(`/files/${user.folderId}`);
+    }
+  }, [router, folderId, user.folderId]);
+
   const [numberDraggedFiles, setNumberDraggedFiles] = useState<number>(0);
   const [folderFiles, setFolderFiles] = useState<any[]>([]);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
@@ -43,7 +53,7 @@ const Files: AuthenticatedPage = ({ user }) => {
   useEffect(() => {
     const fetchFiles = async () => {
       const filesResponse = await fetch(
-        `http://localhost:3001/files/${user.folderId}`,
+        `http://localhost:3001/files/${folderId}`,
         {
           method: 'get',
           credentials: 'include',
@@ -54,7 +64,7 @@ const Files: AuthenticatedPage = ({ user }) => {
     };
 
     fetchFiles().catch(console.error);
-  });
+  }, [folderId]);
 
   const onUploadProgress = useCallback((e: ProgressEvent) => {
     const percentage = (100 * e.loaded) / e.total;
@@ -68,7 +78,7 @@ const Files: AuthenticatedPage = ({ user }) => {
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       const formData = new FormData();
-      formData.set('folderId', `${user.folderId}`);
+      formData.set('folderId', `${folderId}`);
       acceptedFiles.forEach((file) => formData.append('files', file));
 
       try {
@@ -94,7 +104,7 @@ const Files: AuthenticatedPage = ({ user }) => {
         console.error('Error uploading files:', e);
       }
     },
-    [onUploadProgress, user.folderId],
+    [onUploadProgress, folderId],
   );
 
   const { getInputProps, getRootProps, isDragActive } = useDropzone({
@@ -110,7 +120,7 @@ const Files: AuthenticatedPage = ({ user }) => {
       <Head>
         <title>Files - TecCloud</title>
       </Head>
-      <Scaffold user={user} folderId={user.folderId}>
+      <Scaffold user={user} folderId={folderId}>
         <UploadModal open={isDragActive} numberFiles={numberDraggedFiles} />
         <UploadStatusDialog status={uploadStatus} setStatus={setUploadStatus} />
         <Box
@@ -123,12 +133,10 @@ const Files: AuthenticatedPage = ({ user }) => {
           {folderFiles.length == 0 ? (
             <>
               <Typography paragraph>
-                Oops...you don&apos;t have any files yet.
+                Oops... it seems there are no files here :(
               </Typography>
               <input {...getInputProps()} />
-              <Typography paragraph>
-                Drop a file here, or click to select a file to upload!
-              </Typography>
+              <Typography paragraph>Drop a file here to upload it!</Typography>
             </>
           ) : (
             folderFiles.map((file) => (
