@@ -43,6 +43,13 @@ class FileController {
         }
 
         const files = maybeFiles as Express.Multer.File[];
+
+        // Para este punto ya se crearon los files en el diskStorage (creo)
+        // por lo tanto, se debe checar que files tienen en el mismo
+        // nombre que otros files en este folderId.
+        // Los nuevos que se repiten deben ser borrados y marcados
+        // para mandar al cliente y que este decida si quiere reemplazarlos
+
         Promise.all(
           files.map((file) =>
             File.create({

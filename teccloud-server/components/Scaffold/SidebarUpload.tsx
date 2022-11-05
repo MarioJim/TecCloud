@@ -30,6 +30,7 @@ const SidebarUpload = ({ folderId }: SidebarUploadProps) => {
       formData.set('folderId', `${folderId}`);
       acceptedFiles.forEach((file) => formData.append('files', file));
 
+      // Agregar un check para revisar si el nombre de un archivo es igual a uno que esta ya en el servidor
       try {
         await axios.post('http://localhost:3001/files/upload', formData, {
           withCredentials: true,
