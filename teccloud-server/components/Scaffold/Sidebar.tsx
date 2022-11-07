@@ -12,9 +12,9 @@ import SidebarUpload from './SidebarUpload';
 
 interface SidebarProps {
   folderId?: number;
-  folderFiles: any[];
-  setFolderFiles: (files: any[]) => void;
-  setReplaceFiles: (files: any[]) => void;
+  folderFiles?: any[];
+  setFolderFiles?: (files: any[]) => void;
+  setReplaceFiles?: (files: any[]) => void;
 }
 
 const Sidebar = ({
@@ -36,16 +36,19 @@ const Sidebar = ({
   >
     <Toolbar />
     <Box sx={{ overflow: 'auto' }}>
-      {folderId !== undefined && (
-        <List>
-          <SidebarUpload
-            folderId={folderId}
-            folderFiles={folderFiles}
-            setFolderFiles={setFolderFiles}
-            setReplaceFiles={setReplaceFiles}
-          />
-        </List>
-      )}
+      {folderId !== undefined &&
+        folderFiles !== undefined &&
+        setFolderFiles !== undefined &&
+        setReplaceFiles !== undefined && (
+          <List>
+            <SidebarUpload
+              folderId={folderId}
+              folderFiles={folderFiles}
+              setFolderFiles={setFolderFiles}
+              setReplaceFiles={setReplaceFiles}
+            />
+          </List>
+        )}
       <Divider />
       <List>
         <SidebarItem
