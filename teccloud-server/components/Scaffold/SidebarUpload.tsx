@@ -10,12 +10,16 @@ interface SidebarUploadProps {
   folderId: number;
   folderFiles: any[];
   setFolderFiles: (files: any[]) => void;
+  replaceFiles: any[];
+  setReplaceFiles: (files: any[]) => void;
 }
 
 const SidebarUpload = ({
   folderId,
   folderFiles,
   setFolderFiles,
+  replaceFiles,
+  setReplaceFiles,
 }: SidebarUploadProps) => {
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     status: 'initial',
@@ -35,13 +39,17 @@ const SidebarUpload = ({
       const formData = new FormData();
       formData.set('folderId', `${folderId}`);
 
-      const duplicatesFiles = folderFiles;
-      const duplicatesNames = new Set<string>();
-      duplicatesFiles.forEach((file) => duplicatesNames.add(file.originalName));
-
-      acceptedFiles = acceptedFiles.filter(
-        (file) => !duplicatesNames.has(file.name),
+      const currentFiles = new Map<string, string>(
+        folderFiles.map((file) => [file.originalName, file.fileName]),
       );
+
+      const duplicates = acceptedFiles
+        .map((file) => {
+          if (currentFiles.has(file.name)) {
+            return { prevFileName: currentFiles.get(file.name), replace: file };
+          }
+        })
+        .filter((notUndefined) => notUndefined !== undefined);
       acceptedFiles.forEach((file) => formData.append('files', file));
 
       try {
@@ -54,6 +62,7 @@ const SidebarUpload = ({
           },
         );
 
+        setReplaceFiles([...duplicates]);
         setFolderFiles(response.data.files);
       } catch (e: any) {
         if (e.response.status === 413) {
@@ -72,7 +81,7 @@ const SidebarUpload = ({
         console.error('Error uploading files:', e);
       }
     },
-    [onUploadProgress, folderId, folderFiles],
+    [onUploadProgress, folderId, folderFiles, replaceFiles],
   );
 
   const { getInputProps, getRootProps, open } = useDropzone({

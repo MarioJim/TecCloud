@@ -12,6 +12,7 @@ import UploadStatusDialog, {
   UploadStatus,
 } from '../../components/UploadStatusDialog';
 import SingleFile from '../../components/SingleFile';
+import ReplaceFileModal from '../../components/ReplaceFileModal';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
   const res = await fetch('http://localhost:3001/user/auth', {
@@ -46,6 +47,7 @@ const Files: AuthenticatedPage = ({ user }) => {
 
   const [numberDraggedFiles, setNumberDraggedFiles] = useState<number>(0);
   const [folderFiles, setFolderFiles] = useState<any[]>([]);
+  const [replaceFiles, setReplaceFiles] = useState<any[]>([]);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     status: 'initial',
   });
@@ -80,13 +82,17 @@ const Files: AuthenticatedPage = ({ user }) => {
       const formData = new FormData();
       formData.set('folderId', `${folderId}`);
 
-      const duplicatesFiles = folderFiles;
-      const duplicatesNames = new Set<string>();
-      duplicatesFiles.forEach((file) => duplicatesNames.add(file.originalName));
-
-      acceptedFiles = acceptedFiles.filter(
-        (file) => !duplicatesNames.has(file.name),
+      const currentFiles = new Map<string, string>(
+        folderFiles.map((file) => [file.originalName, file.fileName]),
       );
+
+      const duplicates = acceptedFiles
+        .map((file) => {
+          if (currentFiles.has(file.name)) {
+            return { prevFileName: currentFiles.get(file.name), replace: file };
+          }
+        })
+        .filter((notUndefined) => notUndefined !== undefined);
       acceptedFiles.forEach((file) => formData.append('files', file));
 
       try {
@@ -99,6 +105,7 @@ const Files: AuthenticatedPage = ({ user }) => {
           },
         );
 
+        setReplaceFiles([...duplicates]);
         setFolderFiles([...folderFiles, ...response.data.files]);
       } catch (e: any) {
         if (e.response.status === 413) {
@@ -117,7 +124,7 @@ const Files: AuthenticatedPage = ({ user }) => {
         console.error('Error uploading files:', e);
       }
     },
-    [onUploadProgress, folderId, folderFiles],
+    [onUploadProgress, folderId, folderFiles, replaceFiles],
   );
 
   const { getInputProps, getRootProps, isDragActive } = useDropzone({
@@ -140,6 +147,10 @@ const Files: AuthenticatedPage = ({ user }) => {
         setFolderFiles={(files: any[]) => {
           setFolderFiles((prev) => [...prev, ...files]);
         }}
+        replaceFiles={replaceFiles}
+        setReplaceFiles={(files: any[]) => {
+          setReplaceFiles([...files]);
+        }}
       >
         <UploadModal open={isDragActive} numberFiles={numberDraggedFiles} />
         <UploadStatusDialog status={uploadStatus} setStatus={setUploadStatus} />
@@ -150,6 +161,29 @@ const Files: AuthenticatedPage = ({ user }) => {
           }}
           {...getRootProps()}
         >
+          {replaceFiles.length > 0 ? (
+            replaceFiles.map((file) => (
+              <ReplaceFileModal
+                key={file.id}
+                folderId={folderId}
+                prevFileName={file.prevFileName}
+                newFile={file.replace}
+                removeFile={(fileOriginalName: string) => {
+                  setReplaceFiles(
+                    replaceFiles.filter(
+                      (replaceFile) =>
+                        replaceFile.replace.name !== fileOriginalName,
+                    ),
+                  );
+                }}
+                setFolderFiles={(files: any[]) => {
+                  setFolderFiles([...files]);
+                }}
+              />
+            ))
+          ) : (
+            <></>
+          )}
           {folderFiles.length == 0 ? (
             <>
               <Typography paragraph>
