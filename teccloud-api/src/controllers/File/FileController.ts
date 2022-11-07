@@ -11,7 +11,7 @@ class FileController {
     return async (req: Request, res: Response) => {
       const { userId } = req;
       if (!userId) {
-        return res.sendStatus(404);
+        return res.sendStatus(401);
       }
 
       multerInstance.array('files')(req, res, async (error) => {
@@ -157,7 +157,7 @@ class FileController {
       const { fileName } = req.params;
       const { userId } = req;
       if (!fileName || !userId) {
-        return res.sendStatus(404);
+        return res.sendStatus(401);
       }
 
       const fileInfo = await File.findOne({ where: { fileName } });
@@ -166,7 +166,7 @@ class FileController {
       }
 
       const user = await User.findByPk(userId);
-      if (!(user && (await fileInfo.accessableBy(user)))) {
+      if (!(user && (await fileInfo.ownedBy(user)))) {
         return res.sendStatus(401);
       }
 
