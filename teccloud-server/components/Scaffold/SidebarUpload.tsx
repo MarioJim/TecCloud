@@ -8,9 +8,15 @@ import { useDropzone } from 'react-dropzone';
 
 interface SidebarUploadProps {
   folderId: number;
+  folderFiles: any[];
+  setFolderFiles: (files: any[]) => void;
 }
 
-const SidebarUpload = ({ folderId }: SidebarUploadProps) => {
+const SidebarUpload = ({
+  folderId,
+  folderFiles,
+  setFolderFiles,
+}: SidebarUploadProps) => {
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     status: 'initial',
   });
@@ -28,15 +34,27 @@ const SidebarUpload = ({ folderId }: SidebarUploadProps) => {
     async (acceptedFiles: File[]) => {
       const formData = new FormData();
       formData.set('folderId', `${folderId}`);
+
+      const duplicatesFiles = folderFiles;
+      const duplicatesNames = new Set<string>();
+      duplicatesFiles.forEach((file) => duplicatesNames.add(file.originalName));
+
+      acceptedFiles = acceptedFiles.filter(
+        (file) => !duplicatesNames.has(file.name),
+      );
       acceptedFiles.forEach((file) => formData.append('files', file));
 
-      // Agregar un check para revisar si el nombre de un archivo es igual a uno que esta ya en el servidor
       try {
-        await axios.post('http://localhost:3001/files/upload', formData, {
-          withCredentials: true,
-          onUploadProgress,
-        });
-        location.assign('/files');
+        const response = await axios.post(
+          'http://localhost:3001/files/upload',
+          formData,
+          {
+            withCredentials: true,
+            onUploadProgress,
+          },
+        );
+
+        setFolderFiles(response.data.files);
       } catch (e: any) {
         if (e.response.status === 413) {
           setUploadStatus({
@@ -54,7 +72,7 @@ const SidebarUpload = ({ folderId }: SidebarUploadProps) => {
         console.error('Error uploading files:', e);
       }
     },
-    [onUploadProgress, folderId],
+    [onUploadProgress, folderId, folderFiles],
   );
 
   const { getInputProps, getRootProps, open } = useDropzone({

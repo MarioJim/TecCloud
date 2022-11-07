@@ -79,15 +79,27 @@ const Files: AuthenticatedPage = ({ user }) => {
     async (acceptedFiles: File[]) => {
       const formData = new FormData();
       formData.set('folderId', `${folderId}`);
+
+      const duplicatesFiles = folderFiles;
+      const duplicatesNames = new Set<string>();
+      duplicatesFiles.forEach((file) => duplicatesNames.add(file.originalName));
+
+      acceptedFiles = acceptedFiles.filter(
+        (file) => !duplicatesNames.has(file.name),
+      );
       acceptedFiles.forEach((file) => formData.append('files', file));
 
-      // Agregar un check para revisar si el nombre de un archivo es igual a uno que esta ya en el servidor
       try {
-        await axios.post('http://localhost:3001/files/upload', formData, {
-          withCredentials: true,
-          onUploadProgress,
-        });
-        location.assign('/files');
+        const response = await axios.post(
+          'http://localhost:3001/files/upload',
+          formData,
+          {
+            withCredentials: true,
+            onUploadProgress,
+          },
+        );
+
+        setFolderFiles([...folderFiles, ...response.data.files]);
       } catch (e: any) {
         if (e.response.status === 413) {
           setUploadStatus({
@@ -105,7 +117,7 @@ const Files: AuthenticatedPage = ({ user }) => {
         console.error('Error uploading files:', e);
       }
     },
-    [onUploadProgress, folderId],
+    [onUploadProgress, folderId, folderFiles],
   );
 
   const { getInputProps, getRootProps, isDragActive } = useDropzone({
@@ -121,7 +133,14 @@ const Files: AuthenticatedPage = ({ user }) => {
       <Head>
         <title>Files - TecCloud</title>
       </Head>
-      <Scaffold user={user} folderId={folderId}>
+      <Scaffold
+        user={user}
+        folderId={folderId}
+        folderFiles={folderFiles}
+        setFolderFiles={(files: any[]) => {
+          setFolderFiles((prev) => [...prev, ...files]);
+        }}
+      >
         <UploadModal open={isDragActive} numberFiles={numberDraggedFiles} />
         <UploadStatusDialog status={uploadStatus} setStatus={setUploadStatus} />
         <Box

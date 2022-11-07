@@ -12,9 +12,11 @@ import SidebarUpload from './SidebarUpload';
 
 interface SidebarProps {
   folderId?: number;
+  folderFiles: any[];
+  setFolderFiles: (files: any[]) => void;
 }
 
-const Sidebar = ({ folderId }: SidebarProps) => (
+const Sidebar = ({ folderId, folderFiles, setFolderFiles }: SidebarProps) => (
   <Drawer
     variant='permanent'
     sx={{
@@ -30,7 +32,11 @@ const Sidebar = ({ folderId }: SidebarProps) => (
     <Box sx={{ overflow: 'auto' }}>
       {folderId !== undefined && (
         <List>
-          <SidebarUpload folderId={folderId} />
+          <SidebarUpload
+            folderId={folderId}
+            folderFiles={folderFiles}
+            setFolderFiles={setFolderFiles}
+          />
         </List>
       )}
       <Divider />
