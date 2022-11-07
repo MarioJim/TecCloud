@@ -14,7 +14,6 @@ interface SidebarProps {
   folderId?: number;
   folderFiles: any[];
   setFolderFiles: (files: any[]) => void;
-  replaceFiles: any[];
   setReplaceFiles: (files: any[]) => void;
 }
 
@@ -22,7 +21,6 @@ const Sidebar = ({
   folderId,
   folderFiles,
   setFolderFiles,
-  replaceFiles,
   setReplaceFiles,
 }: SidebarProps) => (
   <Drawer
@@ -44,7 +42,6 @@ const Sidebar = ({
             folderId={folderId}
             folderFiles={folderFiles}
             setFolderFiles={setFolderFiles}
-            replaceFiles={replaceFiles}
             setReplaceFiles={setReplaceFiles}
           />
         </List>

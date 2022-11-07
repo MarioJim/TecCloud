@@ -124,7 +124,7 @@ const Files: AuthenticatedPage = ({ user }) => {
         console.error('Error uploading files:', e);
       }
     },
-    [onUploadProgress, folderId, folderFiles, replaceFiles],
+    [onUploadProgress, folderId, folderFiles],
   );
 
   const { getInputProps, getRootProps, isDragActive } = useDropzone({
@@ -147,7 +147,6 @@ const Files: AuthenticatedPage = ({ user }) => {
         setFolderFiles={(files: any[]) => {
           setFolderFiles((prev) => [...prev, ...files]);
         }}
-        replaceFiles={replaceFiles}
         setReplaceFiles={(files: any[]) => {
           setReplaceFiles([...files]);
         }}

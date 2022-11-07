@@ -10,7 +10,6 @@ interface SidebarUploadProps {
   folderId: number;
   folderFiles: any[];
   setFolderFiles: (files: any[]) => void;
-  replaceFiles: any[];
   setReplaceFiles: (files: any[]) => void;
 }
 
@@ -18,7 +17,6 @@ const SidebarUpload = ({
   folderId,
   folderFiles,
   setFolderFiles,
-  replaceFiles,
   setReplaceFiles,
 }: SidebarUploadProps) => {
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
@@ -81,7 +79,7 @@ const SidebarUpload = ({
         console.error('Error uploading files:', e);
       }
     },
-    [onUploadProgress, folderId, folderFiles, replaceFiles],
+    [onUploadProgress, folderId, folderFiles, setFolderFiles, setReplaceFiles],
   );
 
   const { getInputProps, getRootProps, open } = useDropzone({
