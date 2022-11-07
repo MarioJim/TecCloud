@@ -9,9 +9,9 @@ interface ScaffoldProps {
   user: User;
   folderId?: number;
   children: React.ReactNode;
-  folderFiles: any[];
-  setFolderFiles: (files: any[]) => void;
-  setReplaceFiles: (files: any[]) => void;
+  folderFiles?: any[];
+  setFolderFiles?: (files: any[]) => void;
+  setReplaceFiles?: (files: any[]) => void;
 }
 
 const Scaffold = ({
