@@ -66,7 +66,7 @@ const ReplaceFileModal = ({
             transform: 'translate(-50%, -50%)',
             width: 400,
             bgcolor: 'background.paper',
-            border: '5px solid yellow',
+            borderRadius: '25px',
             boxShadow: 24,
             p: 4,
             display: 'flex',

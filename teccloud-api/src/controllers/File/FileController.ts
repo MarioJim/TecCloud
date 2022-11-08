@@ -1,4 +1,5 @@
 import fs from 'fs';
+import fsPromises from 'fs/promises';
 import { Response, RequestHandler, Request } from 'express';
 import { Multer, MulterError } from 'multer';
 import { File, Folder, User } from '../../db';
@@ -49,7 +50,7 @@ class FileController {
           where: {
             folderId,
             originalName: {
-              [Op.or]: files.map((file) => file.originalname),
+              [Op.or]: files.map((file) => iso88591_to_utf8(file.originalname)),
             },
           },
         });
@@ -60,12 +61,15 @@ class FileController {
           duplicateNames.has(file.originalname),
         );
 
-        eraseFiles.forEach((file) => {
-          const fileInServer = get_file_server_path(file.filename);
-          try {
-            fs.unlinkSync(fileInServer);
-          } catch (err) {}
-        });
+        try {
+          await Promise.all(
+            eraseFiles.map((file) =>
+              fsPromises.unlink(get_file_server_path(file.filename)),
+            ),
+          );
+        } catch (error) {
+          console.error(error);
+        }
 
         files = files.filter((file) => !duplicateNames.has(file.originalname));
         Promise.all(
@@ -172,7 +176,7 @@ class FileController {
 
       const fileInServer = get_file_server_path(fileName);
       try {
-        fs.unlinkSync(fileInServer);
+        await fsPromises.unlink(fileInServer);
         await fileInfo.destroy();
 
         res.status(200).send({
