@@ -55,7 +55,9 @@ class FileController {
           },
         });
         const duplicateNames = new Set<string>();
-        duplicateFiles.forEach((file) => duplicateNames.add(file.originalName));
+        duplicateFiles.forEach((file) =>
+          duplicateNames.add(utf8_to_iso88591(file.originalName)),
+        );
 
         const eraseFiles = files.filter((file) =>
           duplicateNames.has(file.originalname),
