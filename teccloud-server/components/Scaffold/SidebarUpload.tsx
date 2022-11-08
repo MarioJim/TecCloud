@@ -8,9 +8,17 @@ import { useDropzone } from 'react-dropzone';
 
 interface SidebarUploadProps {
   folderId: number;
+  folderFiles: any[];
+  setFolderFiles: (files: any[]) => void;
+  setReplaceFiles: (files: any[]) => void;
 }
 
-const SidebarUpload = ({ folderId }: SidebarUploadProps) => {
+const SidebarUpload = ({
+  folderId,
+  folderFiles,
+  setFolderFiles,
+  setReplaceFiles,
+}: SidebarUploadProps) => {
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     status: 'initial',
   });
@@ -28,14 +36,32 @@ const SidebarUpload = ({ folderId }: SidebarUploadProps) => {
     async (acceptedFiles: File[]) => {
       const formData = new FormData();
       formData.set('folderId', `${folderId}`);
+
+      const currentFiles = new Map<string, string>(
+        folderFiles.map((file) => [file.originalName, file.fileName]),
+      );
+
+      const duplicates = acceptedFiles
+        .map((file) => {
+          if (currentFiles.has(file.name)) {
+            return { prevFileName: currentFiles.get(file.name), replace: file };
+          }
+        })
+        .filter((notUndefined) => notUndefined !== undefined);
       acceptedFiles.forEach((file) => formData.append('files', file));
 
       try {
-        await axios.post('http://localhost:3001/files/upload', formData, {
-          withCredentials: true,
-          onUploadProgress,
-        });
-        location.assign('/files');
+        const response = await axios.post(
+          'http://localhost:3001/files/upload',
+          formData,
+          {
+            withCredentials: true,
+            onUploadProgress,
+          },
+        );
+
+        setReplaceFiles([...duplicates]);
+        setFolderFiles(response.data.files);
       } catch (e: any) {
         if (e.response.status === 413) {
           setUploadStatus({
@@ -53,7 +79,7 @@ const SidebarUpload = ({ folderId }: SidebarUploadProps) => {
         console.error('Error uploading files:', e);
       }
     },
-    [onUploadProgress, folderId],
+    [onUploadProgress, folderId, folderFiles, setFolderFiles, setReplaceFiles],
   );
 
   const { getInputProps, getRootProps, open } = useDropzone({

@@ -1,9 +1,11 @@
 import fs from 'fs';
+import fsPromises from 'fs/promises';
 import { Response, RequestHandler, Request } from 'express';
 import { Multer, MulterError } from 'multer';
 import { File, Folder, User } from '../../db';
 import { iso88591_to_utf8, utf8_to_iso88591 } from '../../utils/encoding';
 import { get_file_server_path } from '../../utils/files';
+import { Op } from 'sequelize';
 
 class FileController {
   public upload(multerInstance: Multer): RequestHandler {
@@ -13,7 +15,7 @@ class FileController {
         return res.sendStatus(401);
       }
 
-      multerInstance.array('files')(req, res, (error) => {
+      multerInstance.array('files')(req, res, async (error) => {
         if (error instanceof MulterError) {
           if (error.code === 'LIMIT_FILE_SIZE') {
             return res.status(413).json({
@@ -42,7 +44,36 @@ class FileController {
           });
         }
 
-        const files = maybeFiles as Express.Multer.File[];
+        let files = maybeFiles as Express.Multer.File[];
+
+        const duplicateFiles = await File.findAll({
+          where: {
+            folderId,
+            originalName: {
+              [Op.or]: files.map((file) => iso88591_to_utf8(file.originalname)),
+            },
+          },
+        });
+        const duplicateNames = new Set<string>();
+        duplicateFiles.forEach((file) =>
+          duplicateNames.add(utf8_to_iso88591(file.originalName)),
+        );
+
+        const eraseFiles = files.filter((file) =>
+          duplicateNames.has(file.originalname),
+        );
+
+        try {
+          await Promise.all(
+            eraseFiles.map((file) =>
+              fsPromises.unlink(get_file_server_path(file.filename)),
+            ),
+          );
+        } catch (error) {
+          console.error(error);
+        }
+
+        files = files.filter((file) => !duplicateNames.has(file.originalname));
         Promise.all(
           files.map((file) =>
             File.create({
@@ -147,7 +178,7 @@ class FileController {
 
       const fileInServer = get_file_server_path(fileName);
       try {
-        fs.unlinkSync(fileInServer);
+        await fsPromises.unlink(fileInServer);
         await fileInfo.destroy();
 
         res.status(200).send({

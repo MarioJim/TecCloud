@@ -9,9 +9,19 @@ interface ScaffoldProps {
   user: User;
   folderId?: number;
   children: React.ReactNode;
+  folderFiles?: any[];
+  setFolderFiles?: (files: any[]) => void;
+  setReplaceFiles?: (files: any[]) => void;
 }
 
-const Scaffold = ({ children, user, folderId }: ScaffoldProps) => (
+const Scaffold = ({
+  children,
+  user,
+  folderId,
+  folderFiles,
+  setFolderFiles,
+  setReplaceFiles,
+}: ScaffoldProps) => (
   <Box sx={{ display: 'flex' }}>
     <AppBar
       position='fixed'
@@ -27,7 +37,12 @@ const Scaffold = ({ children, user, folderId }: ScaffoldProps) => (
         </Typography>
       </Toolbar>
     </AppBar>
-    <Sidebar folderId={folderId} />
+    <Sidebar
+      folderId={folderId}
+      folderFiles={folderFiles}
+      setFolderFiles={setFolderFiles}
+      setReplaceFiles={setReplaceFiles}
+    />
     <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
       <Toolbar />
       {children}
