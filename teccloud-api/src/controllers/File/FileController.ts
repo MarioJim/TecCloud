@@ -236,7 +236,7 @@ class FileController {
         files = files.filter((_, i) => filePermissions[i]);
       }
 
-      res.json({ files, folders });
+      res.json({ files, folders, parentId: folder.parentId });
     };
   }
 

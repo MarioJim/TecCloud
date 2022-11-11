@@ -46,7 +46,7 @@ const SingleFile = ({
       spacing={1}
     >
       <IconButton
-        aria-label='delete'
+        aria-label='download'
         size='large'
         target='_blank'
         href={`${apiServer}/files/download/${fileName}`}
