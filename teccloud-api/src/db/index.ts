@@ -12,9 +12,9 @@ import { Page } from './page';
 import { User } from './user';
 
 User.hasOne(Folder);
-Folder.belongsTo(User);
+Folder.hasOne(User);
 
-Folder.belongsTo(Folder);
+Folder.belongsTo(Folder, { foreignKey: 'parentId' });
 Folder.hasMany(Folder);
 
 Folder.hasMany(File);

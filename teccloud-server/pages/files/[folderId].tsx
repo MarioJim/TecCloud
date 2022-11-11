@@ -12,6 +12,7 @@ import UploadStatusDialog, {
   UploadStatus,
 } from '../../components/UploadStatusDialog';
 import SingleFile from '../../components/SingleFile';
+import SingleFolder from '../../components/SingleFolder';
 import ReplaceFileModal from '../../components/ReplaceFileModal';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
@@ -48,6 +49,7 @@ const Files: AuthenticatedPage = ({ user }) => {
   const [numberDraggedFiles, setNumberDraggedFiles] = useState<number>(0);
   const [folderFiles, setFolderFiles] = useState<any[]>([]);
   const [replaceFiles, setReplaceFiles] = useState<any[]>([]);
+  const [folders, setFolders] = useState<any[]>([]);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     status: 'initial',
   });
@@ -62,7 +64,8 @@ const Files: AuthenticatedPage = ({ user }) => {
         },
       );
       const filesJson = await filesResponse.json();
-      setFolderFiles(filesJson);
+      setFolderFiles(filesJson.files);
+      setFolders(filesJson.folders);
     };
 
     fetchFiles().catch(console.error);
@@ -144,11 +147,15 @@ const Files: AuthenticatedPage = ({ user }) => {
         user={user}
         folderId={folderId}
         folderFiles={folderFiles}
+        folders={folders}
         setFolderFiles={(files: any[]) => {
           setFolderFiles((prev) => [...prev, ...files]);
         }}
         setReplaceFiles={(files: any[]) => {
           setReplaceFiles([...files]);
+        }}
+        setFolders={(folder: any) => {
+          setFolders((prev) => [...prev, folder]);
         }}
       >
         <UploadModal open={isDragActive} numberFiles={numberDraggedFiles} />
@@ -183,7 +190,7 @@ const Files: AuthenticatedPage = ({ user }) => {
           ) : (
             <></>
           )}
-          {folderFiles.length == 0 ? (
+          {folderFiles.length == 0 && folders.length == 0 && (
             <>
               <Typography paragraph>
                 Oops... it seems there are no files here :(
@@ -191,15 +198,19 @@ const Files: AuthenticatedPage = ({ user }) => {
               <input {...getInputProps()} />
               <Typography paragraph>Drop a file here to upload it!</Typography>
             </>
-          ) : (
+          )}
+          {folders.length > 0 &&
+            folders.map((folder) => (
+              <SingleFolder key={folder.id + 1000} folderName={folder.name} />
+            ))}
+          {folderFiles.length > 0 &&
             folderFiles.map((file) => (
               <SingleFile
-                key={file.id}
+                key={file.id + 1000}
                 fileName={file.fileName}
                 originalName={file.originalName}
               />
-            ))
-          )}
+            ))}
         </Box>
       </Scaffold>
     </Fragment>
