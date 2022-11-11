@@ -28,7 +28,7 @@ const SingleFile = ({ fileName, originalName }: SingleFileProps) => (
       spacing={1}
     >
       <IconButton
-        aria-label='delete'
+        aria-label='download'
         size='large'
         target='_blank'
         href={`http://localhost:3001/files/download/${fileName}`}

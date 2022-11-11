@@ -147,7 +147,6 @@ class FileController {
       }
 
       let files = await File.findAll({ where: { folderId } });
-      let folders = await Folder.findAll({ where: { parentId: folderId } });
       if (!(await folder.isOwnedBy(user))) {
         const filePermissions = await Promise.all(
           files.map((file) => file.viewableBy(user)),
@@ -155,7 +154,10 @@ class FileController {
         files = files.filter((_, i) => filePermissions[i]);
       }
 
-      res.json({ files: files, folders: folders });
+      let folders = await Folder.findAll({ where: { parentId: folderId } });
+      console.log(folder.parentId);
+
+      res.json({ files: files, folders: folders, parentId: folder.parentId });
     };
   }
 
