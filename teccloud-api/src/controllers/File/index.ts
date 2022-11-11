@@ -36,5 +36,6 @@ router.post(
 );
 router.get('/shared', auth, FileController.getShared());
 router.get('/:folderId', auth, FileController.get());
+router.post('/:folderId', auth, FileController.createFolder());
 
 export default router;

@@ -224,18 +224,19 @@ class FileController {
         return res.sendStatus(404);
       }
 
-      const files = await user.getFiles({
+      let files = await user.getFiles({
         where: { folderId },
         include: [{ model: User }],
       });
-      if (await folder.isOwnedBy(user)) {
-        res.json(files);
-      } else {
+      const folders = await Folder.findAll({ where: { parentId: folderId } });
+      if (!(await folder.isOwnedBy(user))) {
         const filePermissions = await Promise.all(
           files.map((file) => file.viewableBy(user)),
         );
-        res.json(files.filter((_, i) => filePermissions[i]));
+        files = files.filter((_, i) => filePermissions[i]);
       }
+
+      res.json({ files, folders });
     };
   }
 
@@ -288,6 +289,47 @@ class FileController {
           message: 'Could not delete the file.\n' + err,
         });
       }
+    };
+  }
+
+  public createFolder(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { folderName } = req.body;
+      const { folderId } = req.params;
+      const { userId } = req;
+      if (!folderId || !userId) {
+        return res.sendStatus(401);
+      }
+
+      const folders = await Folder.findAll({
+        where: { parentId: folderId, name: folderName },
+      });
+      if (folders.length !== 0) {
+        return res.status(401).json({
+          success: false,
+          message: `Folder with same name already exists`,
+        });
+      }
+
+      Promise.resolve(
+        Folder.create({
+          parentId: parseInt(folderId),
+          name: folderName,
+        }),
+      )
+        .then((folder) => {
+          res.status(201).json({
+            success: true,
+            message: 'Folder created successfully',
+            folder: folder,
+          });
+        })
+        .catch((e) => {
+          res.status(500).json({
+            success: false,
+            message: `Error creating folder`,
+          });
+        });
     };
   }
 }
