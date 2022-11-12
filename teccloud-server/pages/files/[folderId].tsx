@@ -161,7 +161,7 @@ const Files: AuthenticatedPage = ({ user }) => {
           {replaceFiles.length > 0 ? (
             replaceFiles.map((file) => (
               <ReplaceFileModal
-                key={file.id}
+                key={file.replace.name}
                 folderId={folderId}
                 prevFileName={file.prevFileName}
                 newFile={file.replace}
