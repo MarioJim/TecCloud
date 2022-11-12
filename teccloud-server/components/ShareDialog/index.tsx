@@ -20,6 +20,7 @@ interface ShareDialogProps {
   originalName: string;
   accessByLink: 'private' | 'public';
   users: User[];
+  currentUser: User;
 }
 
 const ShareDialog = ({
@@ -29,6 +30,7 @@ const ShareDialog = ({
   originalName,
   accessByLink,
   users,
+  currentUser,
 }: ShareDialogProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const handleClose = () => setOpen(false);
@@ -62,7 +64,12 @@ const ShareDialog = ({
               <Typography sx={{ px: 1, fontWeight: 'bold' }}>
                 Who has access
               </Typography>
-              <UserAccessList fileName={fileName} users={usersList} />
+              <UserAccessList
+                fileName={fileName}
+                users={usersList}
+                setUsers={(newUsers: User[]) => setUsersList(newUsers)}
+                currentUser={currentUser}
+              />
             </Box>
             <Typography sx={{ px: 1, fontWeight: 'bold' }}>
               General access

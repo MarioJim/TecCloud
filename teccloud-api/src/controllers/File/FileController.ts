@@ -144,40 +144,39 @@ class FileController {
 
   public shareWithUser(): RequestHandler {
     return async (req: Request, res: Response) => {
-      const { userId } = req;
-      const fileName = req.body.filename;
-      const addUser = req.body.addUser;
+      const otherUser = req.body.otherUser as User;
+      const fileInfo = req.body.fileInfo as File;
 
-      if (!fileName || !userId || !addUser) {
-        return res.status(404).json({
-          message: 'Missing inut information. Try reloading.\n',
-        });
-      }
+      await fileInfo.addUser(otherUser);
+      const newFile = await File.findOne({
+        where: { fileName: fileInfo.fileName },
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'firstName', 'lastName', 'username', 'folderId'],
+          },
+        ],
+      });
+      res.json(newFile);
+    };
+  }
 
-      let fileInfo = await File.findOne({ where: { fileName } });
-      if (!fileInfo) {
-        return res.status(404).json({
-          message: 'File does not exist. Try reloading.\n',
-        });
-      }
+  public unshareWithUser(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const otherUser = req.body.otherUser as User;
+      const fileInfo = req.body.fileInfo as File;
 
-      const user = await User.findByPk(userId);
-      if (!(user && (await fileInfo.ownedBy(user)))) {
-        return res.status(401).json({
-          message: 'Unauthorized. Verify your session and permissions.\n',
-        });
-      }
-
-      const newUser = await User.findOne({ where: { username: addUser } });
-      if (!newUser) {
-        return res.status(404).json({
-          message: 'Username does not exist. Try with another one.\n',
-        });
-      }
-
-      await fileInfo.addUser(newUser);
-      fileInfo = await File.findOne({ where: { fileName }, include: User });
-      res.json(fileInfo);
+      await fileInfo.removeUser(otherUser);
+      const newFile = await File.findOne({
+        where: { fileName: fileInfo.fileName },
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'firstName', 'lastName', 'username', 'folderId'],
+          },
+        ],
+      });
+      res.json(newFile);
     };
   }
 

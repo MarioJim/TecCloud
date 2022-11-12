@@ -33,7 +33,7 @@ const ShareWithBar = ({ fileName, setUsers }: ShareWithBarProps) => {
     try {
       const response = await axios.post(
         `${apiServer}/files/shareWithUser`,
-        { filename: fileName, addUser: newUser },
+        { filename: fileName, otherUsername: newUser },
         {
           withCredentials: true,
         },

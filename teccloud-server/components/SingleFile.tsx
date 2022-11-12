@@ -15,6 +15,7 @@ interface SingleFileProps {
   originalName: string;
   accessByLink: 'private' | 'public';
   users: User[];
+  currentUser: User;
 }
 
 const SingleFile = ({
@@ -24,6 +25,7 @@ const SingleFile = ({
   originalName,
   accessByLink,
   users,
+  currentUser,
 }: SingleFileProps) => (
   <Box
     sx={{
@@ -65,6 +67,7 @@ const SingleFile = ({
           originalName={originalName}
           accessByLink={accessByLink}
           users={users}
+          currentUser={currentUser}
         />
         <DeleteFileModal fileName={fileName} originalName={originalName} />
       </Stack>

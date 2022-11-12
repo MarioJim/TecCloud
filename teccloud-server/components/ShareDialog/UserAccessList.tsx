@@ -1,31 +1,32 @@
 import { useState } from 'react';
 import type { User } from '../../types';
-import Button from '@mui/material/Button';
-import DeleteIcon from '@mui/icons-material/Delete';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import { apiServer } from '../../config';
+import UserAccessItem from './UserAccessItem';
 
 interface UserAccessListProps {
   fileName: string;
   users: User[];
+  setUsers: (users: User[]) => void;
+  currentUser: User;
 }
 
-const UserAccessList = ({ fileName, users }: UserAccessListProps) => {
+const UserAccessList = ({
+  fileName,
+  users,
+  setUsers,
+  currentUser,
+}: UserAccessListProps) => {
   return (
     <List sx={{ px: 1 }}>
       {users.length > 0 ? (
         users.map((user) => (
-          <ListItem key={user.username}>
-            <ListItemText
-              primary={user.firstName + ' ' + user.lastName}
-              secondary={user.username}
-            />
-            <Button variant='outlined' color='error' startIcon={<DeleteIcon />}>
-              Delete
-            </Button>
-          </ListItem>
+          <UserAccessItem
+            key={user.username}
+            fileName={fileName}
+            user={user}
+            setUsers={setUsers}
+            currentUser={currentUser}
+          />
         ))
       ) : (
         <></>

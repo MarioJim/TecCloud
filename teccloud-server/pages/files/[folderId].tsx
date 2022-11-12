@@ -199,6 +199,7 @@ const Files: AuthenticatedPage = ({ user }) => {
                 originalName={file.originalName}
                 accessByLink={file.accessByLink}
                 users={file.users}
+                currentUser={user}
               />
             ))
           )}
