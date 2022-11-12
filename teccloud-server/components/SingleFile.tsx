@@ -5,6 +5,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import DeleteFileModal from './DeleteFileModal';
 import { apiServer } from '../config';
+import ShareDialog from './ShareDialog';
 
 interface SingleFileProps {
   fileName: string;
@@ -39,7 +40,13 @@ const SingleFile = ({ fileName, originalName }: SingleFileProps) => (
       <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
         {originalName}
       </Typography>
-      <Stack direction='row' justifyContent='flex-end' sx={{ width: 0.4 }}>
+      <Stack
+        direction='row'
+        justifyContent='flex-end'
+        spacing={1}
+        sx={{ width: 0.4 }}
+      >
+        <ShareDialog fileName={fileName} originalName={originalName} />
         <DeleteFileModal fileName={fileName} originalName={originalName} />
       </Stack>
     </Stack>
