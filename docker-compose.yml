@@ -26,30 +26,10 @@ services:
       - database
       - queue
 
-  text-extractor:
-    build:
-      context: .
-      dockerfile: ./teccloud-text-extractor/Dockerfile
+  rust-worker:
+    build: ./teccloud-rust-worker
     environment:
-      - RUST_LOG=info
-      - POSTGRES_HOST=database
-      - RABBITMQ_HOST=queue
-    env_file:
-      - config/postgres.env
-      - config/rabbitmq.env
-    volumes:
-      - userfiles:/app/userfiles
-    depends_on:
-      - api
-      - database
-      - queue
-
-  thumbnail-generator:
-    build:
-      context: .
-      dockerfile: ./teccloud-thumbnail-generator/Dockerfile
-    environment:
-      - RUST_LOG=info
+      - RUST_LOG=debug
       - POSTGRES_HOST=database
       - RABBITMQ_HOST=queue
     env_file:
@@ -71,14 +51,14 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  # pgadmin:
-  #   image: dpage/pgadmin4
-  #   ports:
-  #     - 5050:80
-  #   restart: always
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
-  #     PGADMIN_DEFAULT_PASSWORD: root
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 5050:80
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
 
   queue:
     image: rabbitmq:3-management

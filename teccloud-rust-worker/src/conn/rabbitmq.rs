@@ -14,12 +14,11 @@ use lapin::{
 use tokio::sync::broadcast;
 use tracing::{debug, error, info};
 
-use crate::{Config, ConnectionType, ShutdownSignal};
+use crate::{Config, ShutdownSignal};
 
 pub struct RabbitMQConnection {
     connection: Connection,
     queue_name: String,
-    consumer_tag: &'static str,
 }
 
 impl RabbitMQConnection {
@@ -34,16 +33,9 @@ impl RabbitMQConnection {
             .context("Setting up the RabbitMQ connection")?;
         info!("Connected to RabbitMQ");
 
-        let queue_name = config.queue_name().clone();
-        let consumer_tag = match config.connection_type {
-            ConnectionType::TextExtraction => "text_extractor_consumer",
-            ConnectionType::ThumbnailGeneration => "thumbnail_generator_consumer",
-        };
-
         Ok(Self {
             connection,
-            queue_name,
-            consumer_tag,
+            queue_name: config.queue_name().clone(),
         })
     }
 
@@ -65,7 +57,7 @@ impl RabbitMQConnection {
         let consumer = channel
             .basic_consume(
                 &self.queue_name,
-                self.consumer_tag,
+                "rust_worker",
                 BasicConsumeOptions::default(),
                 FieldTable::default(),
             )

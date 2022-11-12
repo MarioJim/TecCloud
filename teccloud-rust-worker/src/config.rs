@@ -1,8 +1,11 @@
+use std::path::PathBuf;
+
 use anyhow::{Context, Result};
 use lapin::uri::AMQPUri;
+use tokio::fs::canonicalize;
 use tokio_postgres::config::Config as PGConfig;
 
-use crate::ConnectionType;
+use crate::FileInfo;
 
 #[derive(Debug)]
 struct PostgresConfig {
@@ -17,13 +20,12 @@ struct RabbitMQConfig {
     host: String,
     user: String,
     pass: String,
-    text_queue: String,
-    thumb_queue: String,
+    queue: String,
 }
 
 #[derive(Debug)]
 pub struct Config {
-    pub connection_type: ConnectionType,
+    files_folder: String,
     postgres: PostgresConfig,
     rabbitmq: RabbitMQConfig,
 }
@@ -35,13 +37,12 @@ macro_rules! maybe_env_var {
 }
 
 impl Config {
-    pub fn create_from_env(connection_type: ConnectionType) -> Result<Config> {
+    pub fn create_from_env() -> Result<Config> {
         let rabbitmq = RabbitMQConfig {
             host: maybe_env_var!("RABBITMQ_HOST")?,
             user: maybe_env_var!("RABBITMQ_DEFAULT_USER")?,
             pass: maybe_env_var!("RABBITMQ_DEFAULT_PASS")?,
-            text_queue: maybe_env_var!("RABBITMQ_TEXT_QUEUE")?,
-            thumb_queue: maybe_env_var!("RABBITMQ_THUMB_QUEUE")?,
+            queue: maybe_env_var!("RABBITMQ_WORKER_QUEUE")?,
         };
 
         let postgres = PostgresConfig {
@@ -51,18 +52,24 @@ impl Config {
             pass: maybe_env_var!("POSTGRES_PASSWORD")?,
         };
 
+        let files_folder =
+            std::env::var("FILES_FOLDER").unwrap_or_else(|_| String::from("userfiles/"));
+
         Ok(Config {
-            connection_type,
+            files_folder,
             rabbitmq,
             postgres,
         })
     }
 
+    pub async fn path_for_file(&self, file: &FileInfo) -> Result<PathBuf> {
+        canonicalize(format!("{}{}", self.files_folder, file.file_name))
+            .await
+            .context("Canonicalizing path to a file")
+    }
+
     pub(crate) fn queue_name(&self) -> &String {
-        match self.connection_type {
-            ConnectionType::TextExtraction => &self.rabbitmq.text_queue,
-            ConnectionType::ThumbnailGeneration => &self.rabbitmq.thumb_queue,
-        }
+        &self.rabbitmq.queue
     }
 
     pub(crate) fn amqp_uri(&self) -> AMQPUri {

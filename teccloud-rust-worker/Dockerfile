@@ -3,16 +3,19 @@
 # builder container
 FROM rust:1-slim-bullseye as builder
 RUN apt-get update \
-    && apt-get install -y pkg-config libleptonica-dev libtesseract-dev clang libpoppler-glib-dev \
+    && apt-get install -y \
+        clang \
+        libleptonica-dev \
+        libpoppler-glib-dev \
+        libtesseract-dev \
+        pkg-config \
     && rm -rf /var/lib/apt/lists/*
-WORKDIR /teccloud
+WORKDIR /app
 COPY Cargo.toml Cargo.lock ./
-COPY teccloud-shared-rust/ teccloud-shared-rust/
-COPY teccloud-text-extractor/ teccloud-text-extractor/
-COPY teccloud-thumbnail-generator/ teccloud-thumbnail-generator/
+COPY . .
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/root/target \
-    cargo build --bin teccloud-text-extractor --release --locked
+    cargo build --release --locked
 
 # runner container
 FROM debian:bullseye-slim
@@ -25,8 +28,9 @@ RUN apt-get update \
         libreoffice-impress-nogui \
         libreoffice-java-common \
         libreoffice-writer-nogui \
+        poppler-utils \
         tesseract-ocr-spa \
         tzdata \
     && rm -rf /var/lib/apt/lists/*
-COPY --from=builder /teccloud/target/release/teccloud-text-extractor ./
-CMD ["./teccloud-text-extractor"]
+COPY --from=builder /app/target/release/teccloud-rust-worker ./
+CMD ["./teccloud-rust-worker"]

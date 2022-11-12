@@ -1,9 +1,11 @@
 use anyhow::{Context, Result};
 
+pub type FileID = i32;
+
 #[derive(Debug)]
 pub struct FileInfo {
-    pub id: i32,
-    pub file_id: String,
+    pub id: FileID,
+    pub file_name: String,
     pub file_type: String,
 }
 
@@ -35,10 +37,10 @@ impl TryFrom<serde_json::Value> for FileInfo {
             None => anyhow::bail!("Key 'id' not found"),
         };
 
-        let file_id = match map.remove("fileId") {
+        let file_id = match map.remove("fileName") {
             Some(serde_json::Value::String(file_id)) => file_id,
-            Some(_) => anyhow::bail!("Invalid datatype for key 'fileId'"),
-            None => anyhow::bail!("Key 'fileId' not found"),
+            Some(_) => anyhow::bail!("Invalid datatype for key 'fileName'"),
+            None => anyhow::bail!("Key 'fileName' not found"),
         };
 
         let file_type = match map.remove("fileType") {
@@ -49,7 +51,7 @@ impl TryFrom<serde_json::Value> for FileInfo {
 
         Ok(Self {
             id,
-            file_id,
+            file_name: file_id,
             file_type,
         })
     }

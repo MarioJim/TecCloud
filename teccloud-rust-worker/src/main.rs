@@ -1,27 +1,36 @@
 use anyhow::Result;
 use futures_lite::StreamExt;
 use lapin::options::BasicAckOptions;
-use teccloud_shared_rust::{
-    conn::{RabbitMQConnection, WaitForConnections},
-    Config,
-    ConnectionType::ThumbnailGeneration,
-    FileInfo, ShutdownSignal,
+use tracing::error;
+
+mod config;
+mod conn;
+mod file_info;
+mod process;
+mod shutdown_signal;
+
+use crate::{
+    config::Config,
+    conn::{PostgresConnection, RabbitMQConnection, WaitForConnections},
+    file_info::FileInfo,
+    process::process_message,
+    shutdown_signal::ShutdownSignal,
 };
-use tracing::{debug, debug_span, error};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
     let mut shutdown_signal = ShutdownSignal::default();
-    let config = Config::create_from_env(ThumbnailGeneration)?;
+    let config = Config::create_from_env()?;
 
     WaitForConnections::from(&config).start().await?;
 
+    let mut pg_conn = PostgresConnection::setup(&config, &mut shutdown_signal).await?;
     let rmq_conn = RabbitMQConnection::setup(&config).await?;
     let mut consumer = rmq_conn.create_consumer(&mut shutdown_signal).await?;
 
     while let Some(delivery) = consumer.next().await {
-        if let Err(error) = process_message(&delivery.data).await {
+        if let Err(error) = process_message(&delivery.data, &config, &mut pg_conn).await {
             error!(?error, "Error processing message");
         }
         if let Err(error) = delivery.ack(BasicAckOptions::default()).await {
@@ -30,21 +39,6 @@ async fn main() -> Result<()> {
     }
 
     rmq_conn.close().await?;
-
-    Ok(())
-}
-
-async fn process_message(data: &[u8]) -> Result<()> {
-    let processing_file_span = debug_span!("Processing message");
-    let _enter = processing_file_span.enter();
-
-    let file_info = FileInfo::try_from(data)?;
-    debug!(?file_info, "Received file info");
-
-    error!(
-        "Should be generating thumbnails for file {}",
-        file_info.file_id
-    );
 
     Ok(())
 }

@@ -1,9 +1,9 @@
-target/
-
 teccloud-api/dist/
 teccloud-api/node_modules/
 teccloud-api/userfiles/
 teccloud-api/teccloud.sqlite
+
+teccloud-rust-worker/target/
 
 teccloud-server/.next/
 teccloud-server/build/
