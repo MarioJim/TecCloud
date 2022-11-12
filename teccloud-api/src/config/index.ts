@@ -23,7 +23,6 @@ export const rabbitmq = {
   host: process.env.RABBITMQ_HOST,
   user: process.env.RABBITMQ_DEFAULT_USER,
   password: process.env.RABBITMQ_DEFAULT_PASS,
-  textQueue: process.env.RABBITMQ_TEXT_QUEUE,
-  thumbnailsQueue: process.env.RABBITMQ_THUMB_QUEUE,
+  queue: process.env.RABBITMQ_WORKER_QUEUE,
 };
 console.log(`CONFIG: RabbitMQ ${rabbitmq.available ? '' : 'not '}available`);

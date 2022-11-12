@@ -12,16 +12,11 @@ const getRabbitMQChannel = async (): Promise<Channel> => {
     password: rabbitmq.password,
   });
   const channel = await conn.createChannel();
-  if (!rabbitmq.textQueue || !rabbitmq.thumbnailsQueue) {
-    throw new Error('RMQ_TEXT_QUEUE or RMQ_THUMB_QUEUE not defined');
+  if (!rabbitmq.queue) {
+    throw new Error('RABBITMQ_WORKER_QUEUE not defined');
   }
-  await channel.assertQueue(rabbitmq.textQueue);
-  await channel.assertQueue(rabbitmq.thumbnailsQueue);
-  return new RabbitMQChannel(
-    channel,
-    rabbitmq.textQueue,
-    rabbitmq.thumbnailsQueue,
-  );
+  await channel.assertQueue(rabbitmq.queue);
+  return new RabbitMQChannel(channel, rabbitmq.queue);
 };
 
 interface Channel {
@@ -38,24 +33,17 @@ class LoggingChannel implements Channel {
 
 class RabbitMQChannel implements Channel {
   innerChannel: RMQChannel;
-  textQueue: string;
-  thumbnailsQueue: string;
+  queue: string;
 
-  constructor(
-    innerChannel: RMQChannel,
-    textQueue: string,
-    thumbnailsQueue: string,
-  ) {
+  constructor(innerChannel: RMQChannel, queue: string) {
     this.innerChannel = innerChannel;
-    this.textQueue = textQueue;
-    this.thumbnailsQueue = thumbnailsQueue;
+    this.queue = queue;
   }
 
   queueFile(file: File): void {
     const fileJson = JSON.stringify(file);
     const fileBuf = Buffer.from(fileJson);
-    this.innerChannel.sendToQueue(this.textQueue, fileBuf);
-    this.innerChannel.sendToQueue(this.thumbnailsQueue, fileBuf);
+    this.innerChannel.sendToQueue(this.queue, fileBuf);
   }
 }
 

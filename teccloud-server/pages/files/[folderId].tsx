@@ -40,6 +40,18 @@ export const getServerSideProps: GetServerSideUser = async (ctx) => {
   };
 };
 
+const thumbnailFromFileInfo = (file: any): string | undefined => {
+  if (file.fileType.startsWith('image/')) {
+    return `${apiServer}/files/download/${file.fileName}`;
+  }
+  for (const page of file.pages) {
+    if (page.thumbnailPath) {
+      return `${apiServer}/files/thumbnail/${page.thumbnailPath}`;
+    }
+  }
+  return undefined;
+};
+
 const Files: AuthenticatedPage = ({ user }) => {
   const router = useRouter();
   const { folderId: maybeFolderId } = router.query;
@@ -166,7 +178,8 @@ const Files: AuthenticatedPage = ({ user }) => {
         <Box
           sx={{
             maxWidth: 'calc(100vw - 300px)',
-            minHeight: 'calc(100vh - 112px)',
+            display: 'flex',
+            flexWrap: 'wrap',
           }}
           {...getRootProps()}
         >
@@ -251,6 +264,7 @@ const Files: AuthenticatedPage = ({ user }) => {
                 users={file.users}
                 ownerId={file.file_access.ownerId}
                 currentUser={user}
+                thumbnail={thumbnailFromFileInfo(file)}
               />
             ))}
         </Box>

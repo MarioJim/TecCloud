@@ -1,13 +1,15 @@
+import type { User } from '../types';
 import { useState } from 'react';
 import Box from '@mui/material/Box';
-import type { User } from '../types';
-import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
+import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
+import CardMedia from '@mui/material/CardMedia';
+import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
+import InsertDriveFileTwoToneIcon from '@mui/icons-material/InsertDriveFileTwoTone';
 import FileModal from './FileModal';
-import { apiServer } from '../config';
 import ShareDialog from './ShareDialog';
+import { apiServer } from '../config';
 
 interface SingleFileProps {
   fileId: number;
@@ -18,6 +20,7 @@ interface SingleFileProps {
   users: User[];
   ownerId: number;
   currentUser: User;
+  thumbnail?: string;
 }
 
 const SingleFile = ({
@@ -29,67 +32,74 @@ const SingleFile = ({
   users,
   ownerId,
   currentUser,
+  thumbnail,
 }: SingleFileProps) => {
-  const [currentName, setCurrentName] = useState<any>(originalName);
+  const [currentName, setCurrentName] = useState<string>(originalName);
 
   return (
-    <Box
-      sx={{
-        height: '54px',
-        borderTop: 1,
-        borderBottom: 1,
-        borderColor: 'primary.main',
-        alignItems: 'center',
-        margin: '5px',
-      }}
-    >
-      <Stack
-        direction='row'
-        justifyContent='flex-start'
-        alignItems='center'
-        spacing={1}
+  <Card
+    sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      margin: '8px',
+      width: '270px',
+    }}
+  >
+    {thumbnail ? (
+      <CardMedia
+        component='img'
+        height='180'
+        image={thumbnail}
+        alt={`Thumbnail for file ${originalName}`}
+        sx={{ objectPosition: 'top left' }}
+      />
+    ) : (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: 180,
+          fontSize: '72px',
+        }}
       >
+        <InsertDriveFileTwoToneIcon fontSize='inherit' color='primary' />
+      </Box>
+    )}
+    <Box sx={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
+      <Typography noWrap sx={{ flex: 1, marginLeft: '8px' }}>
+        {currentName}
+      </Typography>
+      <Box sx={{ display: 'flex' }}>
         <IconButton
-          aria-label='download'
-          size='large'
+          size='medium'
           target='_blank'
           href={`${apiServer}/files/download/${fileName}`}
         >
           <DownloadForOfflineIcon fontSize='inherit' />
         </IconButton>
-        <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
-          {currentName}
-        </Typography>
-        <Stack
-          direction='row'
-          justifyContent='flex-end'
-          spacing={1}
-          sx={{ width: 0.4, paddingRight: 2 }}
-        >
-          <ShareDialog
-            fileId={fileId}
-            folderId={folderId}
-            fileName={fileName}
-            originalName={originalName}
-            accessByLink={accessByLink}
-            users={users}
-            ownerId={ownerId}
-            currentUser={currentUser}
-          />
-          {ownerId === currentUser.id ? (
+        <ShareDialog
+          fileId={fileId}
+          folderId={folderId}
+          fileName={fileName}
+          originalName={originalName}
+          accessByLink={accessByLink}
+          users={users}
+          ownerId={ownerId}
+          currentUser={currentUser}
+        />
+        {ownerId === currentUser.id && (
             <FileModal
               folderId={folderId}
               fileName={fileName}
               originalName={currentName}
               setCurrentName={setCurrentName}
             />
-          ) : (
-            <></>
-          )}
-        </Stack>
-      </Stack>
+        )}
+      </Box>
     </Box>
-  );
-};
+  </Card>
+);
 
 export default SingleFile;

@@ -29,13 +29,14 @@ router.post(
 );
 router.put('/rename', auth, FileController.rename());
 router.delete('/:fileName', auth, FileController.delete());
-router.get('/download/:fileName', auth, FileController.download());
+router.get('/download/:fileName', auth, FileController.get());
+router.get('/thumbnail/:fileName', auth, FileController.getThumbnail());
 router.post(
   '/changeAccess/:fileName',
   auth,
   FileController.changeGeneralAccess(),
 );
 router.get('/shared', auth, FileController.getShared());
-router.get('/:folderId', auth, FileController.get());
+router.get('/:folderId', auth, FileController.getFolder());
 
 export default router;

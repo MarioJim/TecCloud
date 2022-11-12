@@ -24,7 +24,7 @@ app.use('/folder', FolderRoutes);
 
 (async () => {
   await channel;
-  await sequelize.sync({ force: true });
+  await sequelize.sync({});
 
   app.listen(port, () => {
     console.log(`Server listening on port ${port}`);

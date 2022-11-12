@@ -3,7 +3,7 @@ import fsPromises from 'fs/promises';
 import { Response, RequestHandler, Request } from 'express';
 import { Multer, MulterError } from 'multer';
 import { Op } from 'sequelize';
-import { File, Folder, User } from '../../db';
+import { File, Folder, Page, PagesOnAFile, User } from '../../db';
 import { iso88591_to_utf8, utf8_to_iso88591 } from '../../utils/encoding';
 import { get_file_server_path } from '../../utils/files';
 import { channel } from '../../queue';
@@ -114,7 +114,7 @@ class FileController {
     };
   }
 
-  public download(): RequestHandler {
+  public get(): RequestHandler {
     return async (req: Request, res: Response) => {
       const { fileName } = req.params;
       const { userId } = req;
@@ -216,7 +216,49 @@ class FileController {
     };
   }
 
-  public get(): RequestHandler {
+  public getThumbnail(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { fileName } = req.params;
+      const { userId } = req;
+      if (!fileName || !userId) {
+        return res.sendStatus(404);
+      }
+
+      const pageInfo = await Page.findOne({
+        where: { thumbnailPath: fileName },
+      });
+      if (!pageInfo) {
+        return res.sendStatus(404);
+      }
+
+      const fileInfo = await File.findByPk(pageInfo.fileId);
+      if (!fileInfo) {
+        console.error(
+          `Couldn't find file ${pageInfo.fileId} for thumbnail '${fileName}', page ${pageInfo.number}`,
+        );
+        return res.sendStatus(500);
+      }
+
+      const user = await User.findByPk(userId);
+      if (!(user && (await fileInfo.accessableBy(user)))) {
+        return res.sendStatus(401);
+      }
+
+      const fileInServer = get_file_server_path(fileName);
+      if (fs.existsSync(fileInServer)) {
+        const originalName = utf8_to_iso88591(fileInfo.originalName);
+        res.set(
+          'Content-Disposition',
+          `inline; filename="Page ${pageInfo.number} of '${originalName}'"`,
+        );
+        res.sendFile(fileInServer);
+      } else {
+        res.sendStatus(500);
+      }
+    };
+  }
+
+  public getFolder(): RequestHandler {
     return async (req: Request, res: Response) => {
       const { folderId } = req.params;
       const { userId } = req;
@@ -231,7 +273,7 @@ class FileController {
 
       let files = await user.getFiles({
         where: { folderId },
-        include: [{ model: User }],
+        include: [{ model: User }, { association: PagesOnAFile, as: 'pages' }],
       });
       if (!(await folder.isOwnedBy(user))) {
         const filePermissions = await Promise.all(
@@ -325,6 +367,8 @@ class FileController {
         return res.sendStatus(404);
       }
 
+      const pages = await Page.findAll({ where: { fileId: fileInfo.id } });
+
       const user = await User.findByPk(userId);
       if (!(user && (await fileInfo.ownedBy(user)))) {
         return res.sendStatus(401);
@@ -342,6 +386,22 @@ class FileController {
         res.status(500).send({
           message: 'Could not delete the file.\n' + err,
         });
+      }
+
+      try {
+        await Promise.allSettled(
+          pages.map(async (page) => {
+            if (page.thumbnailPath) {
+              const thumbnailInServer = get_file_server_path(
+                page.thumbnailPath,
+              );
+              await fsPromises.unlink(thumbnailInServer);
+              await page.destroy();
+            }
+          }),
+        );
+      } catch (err) {
+        console.error(err);
       }
     };
   }

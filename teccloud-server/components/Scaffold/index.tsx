@@ -3,6 +3,7 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Sidebar from './Sidebar';
+import SearchBar from './SearchBar';
 import { User } from '../../types';
 
 interface ScaffoldProps {
@@ -35,6 +36,8 @@ const Scaffold = ({
         <Typography variant='h5' noWrap component='div'>
           TecCloud
         </Typography>
+
+        {folderId !== undefined && <SearchBar folderId={folderId} />}
 
         <Typography variant='h6' noWrap component='div'>
           {user.username}

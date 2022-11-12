@@ -16,8 +16,6 @@ export class Page extends Model<
   declare number: number;
   declare thumbnailPath: string;
   declare content: string;
-  declare createdAt: CreationOptional<Date>;
-  declare updatedAt: CreationOptional<Date>;
 }
 
 Page.init(
@@ -41,12 +39,9 @@ Page.init(
     },
     thumbnailPath: DataTypes.STRING,
     content: DataTypes.TEXT,
-    createdAt: DataTypes.DATE,
-    updatedAt: DataTypes.DATE,
   },
   {
     sequelize,
     modelName: 'pages',
-    timestamps: true,
   },
 );
