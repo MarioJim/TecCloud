@@ -4,6 +4,7 @@ import {
   CreationOptional,
   InferAttributes,
   InferCreationAttributes,
+  BelongsToManyAddAssociationMixin,
 } from 'sequelize';
 import { sequelize, Folder, User, FileAccess } from './index';
 
@@ -22,6 +23,7 @@ export class File extends Model<
   declare timesViewed: CreationOptional<number>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
+  declare addUser: BelongsToManyAddAssociationMixin<User, number>;
 
   async accessableBy(user: User): Promise<boolean> {
     return (await this.ownedBy(user)) || (await this.viewableBy(user));

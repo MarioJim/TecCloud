@@ -92,6 +92,7 @@ class FileController {
         )
           .then(async (savedFiles) => {
             await user.addFiles(savedFiles);
+            savedFiles = await user.getFiles({ include: [{ model: User }] });
             res.status(201).json({
               success: true,
               message: 'Files uploaded successfully',
@@ -138,6 +139,45 @@ class FileController {
       } else {
         res.sendStatus(500);
       }
+    };
+  }
+
+  public shareWithUser(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { userId } = req;
+      const fileName = req.body.filename;
+      const addUser = req.body.addUser;
+
+      if (!fileName || !userId || !addUser) {
+        return res.status(404).json({
+          message: 'Missing inut information. Try reloading.\n',
+        });
+      }
+
+      let fileInfo = await File.findOne({ where: { fileName } });
+      if (!fileInfo) {
+        return res.status(404).json({
+          message: 'File does not exist. Try reloading.\n',
+        });
+      }
+
+      const user = await User.findByPk(userId);
+      if (!(user && (await fileInfo.ownedBy(user)))) {
+        return res.status(401).json({
+          message: 'Unauthorized. Verify your session and permissions.\n',
+        });
+      }
+
+      const newUser = await User.findOne({ where: { username: addUser } });
+      if (!newUser) {
+        return res.status(404).json({
+          message: 'Username does not exist. Try with another one.\n',
+        });
+      }
+
+      await fileInfo.addUser(newUser);
+      fileInfo = await File.findOne({ where: { fileName }, include: User });
+      res.json(fileInfo);
     };
   }
 

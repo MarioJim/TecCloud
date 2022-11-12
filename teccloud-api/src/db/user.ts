@@ -5,6 +5,7 @@ import {
   InferAttributes,
   InferCreationAttributes,
   BelongsToManyAddAssociationsMixin,
+  BelongsToManyGetAssociationsMixin,
 } from 'sequelize';
 import * as jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -25,6 +26,7 @@ export class User extends Model<
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
   declare addFiles: BelongsToManyAddAssociationsMixin<File, number>;
+  declare getFiles: BelongsToManyGetAssociationsMixin<File>;
 
   async generateToken(): Promise<string> {
     const token = jwt.sign({ id: this.id.toString() }, jwtSecret, {

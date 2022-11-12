@@ -33,6 +33,8 @@ const ShareDialog = ({
   const [open, setOpen] = useState<boolean>(false);
   const handleClose = () => setOpen(false);
 
+  const [usersList, setUsersList] = useState<User[]>(users);
+
   return (
     <>
       <Button variant='contained' color='info' onClick={() => setOpen(true)}>
@@ -48,7 +50,10 @@ const ShareDialog = ({
             alignItems='flex-start'
             spacing={1}
           >
-            <ShareWithBar fileName={fileName} />
+            <ShareWithBar
+              fileName={fileName}
+              setUsers={(newUsers: User[]) => setUsersList(newUsers)}
+            />
             <Box
               sx={{
                 width: '100%',
@@ -57,7 +62,7 @@ const ShareDialog = ({
               <Typography sx={{ px: 1, fontWeight: 'bold' }}>
                 Who has access
               </Typography>
-              <UserAccessList fileName={fileName} users={users} />
+              <UserAccessList fileName={fileName} users={usersList} />
             </Box>
             <Typography sx={{ px: 1, fontWeight: 'bold' }}>
               General access

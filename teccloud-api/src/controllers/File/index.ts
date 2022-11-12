@@ -14,6 +14,7 @@ const multerInstance = multer({
 const router = Router({ mergeParams: true });
 
 router.post('/upload', auth, FileController.upload(multerInstance));
+router.post('/shareWithUser', auth, FileController.shareWithUser());
 router.delete('/:fileName', auth, FileController.delete());
 router.get('/download/:fileName', auth, FileController.download());
 router.get('/:folderId', auth, FileController.get());
