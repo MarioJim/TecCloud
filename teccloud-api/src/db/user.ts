@@ -4,10 +4,11 @@ import {
   CreationOptional,
   InferAttributes,
   InferCreationAttributes,
+  BelongsToManyAddAssociationsMixin,
 } from 'sequelize';
 import * as jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { sequelize, Folder } from './index';
+import { sequelize, Folder, File } from './index';
 import { jwtSecret } from '../config';
 
 export class User extends Model<
@@ -23,6 +24,7 @@ export class User extends Model<
   declare token: CreationOptional<string>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
+  declare addFiles: BelongsToManyAddAssociationsMixin<File, number>;
 
   async generateToken(): Promise<string> {
     const token = jwt.sign({ id: this.id.toString() }, jwtSecret, {

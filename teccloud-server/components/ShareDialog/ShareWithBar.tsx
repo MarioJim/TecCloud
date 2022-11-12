@@ -17,11 +17,7 @@ const ShareWithBar = ({ fileName }: ShareWithBarProps) => {
         <InputLabel htmlFor={'share-with-bar-' + { fileName }}>
           Share with
         </InputLabel>
-        <FilledInput
-          fullWidth
-          id={'share-with-bar-' + { fileName }}
-          placeholder='Write a username'
-        />
+        <FilledInput fullWidth placeholder='Write a username' />
         <Button variant='contained'>Share</Button>
       </Stack>
     </FormControl>

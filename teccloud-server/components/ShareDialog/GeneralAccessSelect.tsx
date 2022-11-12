@@ -9,10 +9,14 @@ import { apiServer } from '../../config';
 
 interface GeneralAccessSelectProps {
   fileName: string;
+  accessByLink: 'public' | 'private';
 }
 
-const GeneralAccessSelect = ({ fileName }: GeneralAccessSelectProps) => {
-  const [generalAccess, setGeneralAccess] = useState<string>('public');
+const GeneralAccessSelect = ({
+  fileName,
+  accessByLink,
+}: GeneralAccessSelectProps) => {
+  const [generalAccess, setGeneralAccess] = useState<string>(accessByLink);
   const handleChange = (event: SelectChangeEvent) => {
     setGeneralAccess(event.target.value);
   };
@@ -27,7 +31,6 @@ const GeneralAccessSelect = ({ fileName }: GeneralAccessSelectProps) => {
       </InputLabel>
       <Stack direction='row' spacing={1}>
         <Select
-          labelId='demo-select-small'
           id={'general-access-select-' + { fileName }}
           value={generalAccess}
           label='Access'

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { User } from '../../types';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -13,11 +14,22 @@ import UserAccessList from './UserAccessList';
 import GeneralAccessSelect from './GeneralAccessSelect';
 
 interface ShareDialogProps {
+  fileId: number;
+  folderId: number;
   fileName: string;
   originalName: string;
+  accessByLink: 'private' | 'public';
+  users: User[];
 }
 
-const ShareDialog = ({ fileName, originalName }: ShareDialogProps) => {
+const ShareDialog = ({
+  fileId,
+  folderId,
+  fileName,
+  originalName,
+  accessByLink,
+  users,
+}: ShareDialogProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const handleClose = () => setOpen(false);
 
@@ -27,10 +39,10 @@ const ShareDialog = ({ fileName, originalName }: ShareDialogProps) => {
         Share
       </Button>
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth='sm'>
-        <DialogTitle id='share-dialog-title' sx={{ fontWeight: 'bold' }}>
+        <DialogTitle sx={{ fontWeight: 'bold' }}>
           Share "{originalName}"
         </DialogTitle>
-        <DialogContent id='share-dialog-description'>
+        <DialogContent>
           <Stack
             justifyContent='flex-start'
             alignItems='flex-start'
@@ -45,12 +57,15 @@ const ShareDialog = ({ fileName, originalName }: ShareDialogProps) => {
               <Typography sx={{ px: 1, fontWeight: 'bold' }}>
                 Who has access
               </Typography>
-              <UserAccessList fileName={fileName} />
+              <UserAccessList fileName={fileName} users={users} />
             </Box>
             <Typography sx={{ px: 1, fontWeight: 'bold' }}>
               General access
             </Typography>
-            <GeneralAccessSelect fileName={fileName} />
+            <GeneralAccessSelect
+              fileName={fileName}
+              accessByLink={accessByLink}
+            />
           </Stack>
         </DialogContent>
         <DialogActions sx={{ marginRight: 2, marginBottom: 1 }}>

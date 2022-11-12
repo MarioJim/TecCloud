@@ -193,8 +193,12 @@ const Files: AuthenticatedPage = ({ user }) => {
             folderFiles.map((file) => (
               <SingleFile
                 key={file.id}
+                fileId={file.id}
+                folderId={file.folderId}
                 fileName={file.fileName}
                 originalName={file.originalName}
+                accessByLink={file.accessByLink}
+                users={file.users}
               />
             ))
           )}

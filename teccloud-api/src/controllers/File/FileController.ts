@@ -15,6 +15,11 @@ class FileController {
         return res.sendStatus(401);
       }
 
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return res.sendStatus(401);
+      }
+
       multerInstance.array('files')(req, res, async (error) => {
         if (error instanceof MulterError) {
           if (error.code === 'LIMIT_FILE_SIZE') {
@@ -85,7 +90,8 @@ class FileController {
             }),
           ),
         )
-          .then((savedFiles) => {
+          .then(async (savedFiles) => {
+            await user.addFiles(savedFiles);
             res.status(201).json({
               success: true,
               message: 'Files uploaded successfully',
@@ -146,7 +152,10 @@ class FileController {
         return res.sendStatus(404);
       }
 
-      const files = await File.findAll({ where: { folderId } });
+      const files = await File.findAll({
+        where: { folderId },
+        include: [{ model: User }],
+      });
       if (await folder.isOwnedBy(user)) {
         res.json(files);
       } else {

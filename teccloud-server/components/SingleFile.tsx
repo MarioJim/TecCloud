@@ -1,4 +1,5 @@
 import Box from '@mui/material/Box';
+import type { User } from '../types';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
@@ -8,11 +9,22 @@ import { apiServer } from '../config';
 import ShareDialog from './ShareDialog';
 
 interface SingleFileProps {
+  fileId: number;
+  folderId: number;
   fileName: string;
   originalName: string;
+  accessByLink: 'private' | 'public';
+  users: User[];
 }
 
-const SingleFile = ({ fileName, originalName }: SingleFileProps) => (
+const SingleFile = ({
+  fileId,
+  folderId,
+  fileName,
+  originalName,
+  accessByLink,
+  users,
+}: SingleFileProps) => (
   <Box
     sx={{
       height: '54px',
@@ -46,7 +58,14 @@ const SingleFile = ({ fileName, originalName }: SingleFileProps) => (
         spacing={1}
         sx={{ width: 0.4 }}
       >
-        <ShareDialog fileName={fileName} originalName={originalName} />
+        <ShareDialog
+          fileId={fileId}
+          folderId={folderId}
+          fileName={fileName}
+          originalName={originalName}
+          accessByLink={accessByLink}
+          users={users}
+        />
         <DeleteFileModal fileName={fileName} originalName={originalName} />
       </Stack>
     </Stack>
