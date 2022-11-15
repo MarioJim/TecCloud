@@ -60,7 +60,7 @@ const SingleFile = ({
         direction='row'
         justifyContent='flex-end'
         spacing={1}
-        sx={{ width: 0.4 }}
+        sx={{ width: 0.4, paddingRight: 2 }}
       >
         <ShareDialog
           fileId={fileId}

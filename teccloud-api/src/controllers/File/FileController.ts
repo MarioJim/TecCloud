@@ -291,47 +291,6 @@ class FileController {
       }
     };
   }
-
-  public createFolder(): RequestHandler {
-    return async (req: Request, res: Response) => {
-      const { folderName } = req.body;
-      const { folderId } = req.params;
-      const { userId } = req;
-      if (!folderId || !userId) {
-        return res.sendStatus(401);
-      }
-
-      const folders = await Folder.findAll({
-        where: { parentId: folderId, name: folderName },
-      });
-      if (folders.length !== 0) {
-        return res.status(401).json({
-          success: false,
-          message: `Folder with same name already exists`,
-        });
-      }
-
-      Promise.resolve(
-        Folder.create({
-          parentId: parseInt(folderId),
-          name: folderName,
-        }),
-      )
-        .then((folder) => {
-          res.status(201).json({
-            success: true,
-            message: 'Folder created successfully',
-            folder: folder,
-          });
-        })
-        .catch((e) => {
-          res.status(500).json({
-            success: false,
-            message: `Error creating folder`,
-          });
-        });
-    };
-  }
 }
 
 export default new FileController();

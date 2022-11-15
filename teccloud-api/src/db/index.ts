@@ -25,11 +25,11 @@ import { User } from './user';
 User.hasOne(Folder);
 Folder.hasOne(User);
 
-Folder.belongsTo(Folder, { foreignKey: 'parentId' });
-Folder.hasMany(Folder);
+Folder.belongsTo(Folder, { foreignKey: 'parentId', onDelete: 'cascade' });
+Folder.hasMany(Folder, { onDelete: 'cascade' });
 
-Folder.hasMany(File);
-File.belongsTo(Folder);
+Folder.hasMany(File, { onDelete: 'cascade' });
+File.belongsTo(Folder, { onDelete: 'cascade' });
 
 User.belongsToMany(File, { through: FileAccess });
 File.belongsToMany(User, { through: FileAccess });
