@@ -5,10 +5,13 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useEffect, useRef, useState } from 'react';
+import DeleteFolderModal from './DeleteFolderModal';
 
 interface SingleFolderProps {
   folderId: number;
   folderName: string;
+  folders: any[];
+  setFolders: (folder: any) => void;
 }
 
 const useOutsideClick = (callback: any) => {
@@ -31,7 +34,12 @@ const useOutsideClick = (callback: any) => {
   return ref;
 };
 
-const SingleFolder = ({ folderId, folderName }: SingleFolderProps) => {
+const SingleFolder = ({
+  folderId,
+  folderName,
+  folders,
+  setFolders,
+}: SingleFolderProps) => {
   const [folderColor, setFolderColor] = useState<any>(blue[50]);
 
   const handleClickOutside = () => {
@@ -78,6 +86,18 @@ const SingleFolder = ({ folderId, folderName }: SingleFolderProps) => {
         <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
           {folderName}
         </Typography>
+        <Stack
+          direction='row'
+          justifyContent='flex-end'
+          sx={{ width: 0.4, paddingRight: 2 }}
+        >
+          <DeleteFolderModal
+            folderId={folderId}
+            folderName={folderName}
+            folders={folders}
+            setFolders={setFolders}
+          />
+        </Stack>
       </Stack>
     </Box>
   );

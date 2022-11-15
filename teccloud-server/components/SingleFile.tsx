@@ -38,7 +38,11 @@ const SingleFile = ({ fileName, originalName }: SingleFileProps) => (
       <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
         {originalName}
       </Typography>
-      <Stack direction='row' justifyContent='flex-end' sx={{ width: 0.4 }}>
+      <Stack
+        direction='row'
+        justifyContent='flex-end'
+        sx={{ width: 0.4, paddingRight: 2 }}
+      >
         <DeleteFileModal fileName={fileName} originalName={originalName} />
       </Stack>
     </Stack>

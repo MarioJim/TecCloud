@@ -53,11 +53,7 @@ const Sidebar = ({
               setFolderFiles={setFolderFiles}
               setReplaceFiles={setReplaceFiles}
             />
-            <SidebarAddFolder
-              folderId={folderId}
-              folders={folders}
-              setFolders={setFolders}
-            />
+            <SidebarAddFolder folderId={folderId} setFolders={setFolders} />
           </List>
         )}
       <Divider />

@@ -236,6 +236,12 @@ const Files: AuthenticatedPage = ({ user }) => {
                 key={folder.id + 1000}
                 folderId={folder.id}
                 folderName={folder.name}
+                folders={folders}
+                setFolders={(folderToRemove: any) => {
+                  setFolders((prev) =>
+                    prev.filter((folder) => folder.id !== folderToRemove),
+                  );
+                }}
               />
             ))}
           {folderFiles.length > 0 &&

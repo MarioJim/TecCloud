@@ -15,15 +15,10 @@ import AlertTitle from '@mui/material/AlertTitle';
 
 interface SidebarAddFolderProps {
   folderId: number;
-  folders?: any[];
   setFolders: (folder: any) => void;
 }
 
-const SidebarAddFolder = ({
-  folderId,
-  folders,
-  setFolders,
-}: SidebarAddFolderProps) => {
+const SidebarAddFolder = ({ folderId, setFolders }: SidebarAddFolderProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const handleClose = () => setOpen(false);
@@ -36,7 +31,7 @@ const SidebarAddFolder = ({
 
     try {
       const response = await axios.post(
-        `http://localhost:3001/files/${folderId}`,
+        `http://localhost:3001/folder/${folderId}`,
         { folderName: target.folderName.value },
         {
           withCredentials: true,
@@ -45,9 +40,9 @@ const SidebarAddFolder = ({
       setError(false);
       handleClose();
       setFolders(response.data.folder);
-    } catch (e: any) {
-      console.log(e);
-      if (e.response.status === 401) {
+    } catch (err: any) {
+      console.log(err);
+      if (err.response.status === 401) {
         setError(true);
       }
     }

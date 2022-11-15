@@ -16,6 +16,5 @@ router.post('/upload', auth, FileController.upload(multerInstance));
 router.delete('/:fileName', auth, FileController.delete());
 router.get('/download/:fileName', auth, FileController.download());
 router.get('/:folderId', auth, FileController.get());
-router.post('/:folderId', auth, FileController.createFolder());
 
 export default router;
