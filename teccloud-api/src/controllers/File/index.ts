@@ -30,7 +30,7 @@ router.post(
 router.delete('/:fileName', auth, FileController.delete());
 router.get('/download/:fileName', auth, FileController.download());
 router.post(
-  '/change-access/:fileName',
+  '/changeAccess/:fileName',
   auth,
   FileController.changeGeneralAccess(),
 );

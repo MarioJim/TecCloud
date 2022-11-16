@@ -46,10 +46,6 @@ const shareChecks: Handler = async (
   req.body.fileInfo = fileInfo;
   req.body.otherUser = otherUser;
   next();
-  const token = req.cookies.authcookie;
-  if (!token) {
-    return res.status(401).json({ error: 'No session.' });
-  }
 };
 
 export default shareChecks;

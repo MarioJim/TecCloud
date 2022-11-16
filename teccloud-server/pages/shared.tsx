@@ -55,23 +55,19 @@ const Shared: AuthenticatedPage = ({ user }) => {
             minHeight: 'calc(100vh - 112px)',
           }}
         >
-          {sharedFiles.length == 0 ? (
-            <></>
-          ) : (
-            sharedFiles.map((file) => (
-              <SingleFile
-                key={file.id}
-                fileId={file.id}
-                folderId={file.folderId}
-                fileName={file.fileName}
-                originalName={file.originalName}
-                accessByLink={file.accessByLink}
-                users={file.users}
-                ownerId={file.file_access.ownerId}
-                currentUser={user}
-              />
-            ))
-          )}
+          {sharedFiles.map((file) => (
+            <SingleFile
+              key={file.id}
+              fileId={file.id}
+              folderId={file.folderId}
+              fileName={file.fileName}
+              originalName={file.originalName}
+              accessByLink={file.accessByLink}
+              users={file.users}
+              ownerId={file.file_access.ownerId}
+              currentUser={user}
+            />
+          ))}
         </Box>
       </Scaffold>
     </Fragment>

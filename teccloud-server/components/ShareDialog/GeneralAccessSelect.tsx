@@ -30,7 +30,7 @@ const GeneralAccessSelect = ({
   const handleApply = async () => {
     try {
       await axios.post(
-        `${apiServer}/files/change-access/${fileName}`,
+        `${apiServer}/files/changeAccess/${fileName}`,
         { generalAccess: generalAccess },
         {
           withCredentials: true,
