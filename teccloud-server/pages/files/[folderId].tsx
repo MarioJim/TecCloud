@@ -161,7 +161,7 @@ const Files: AuthenticatedPage = ({ user }) => {
           {replaceFiles.length > 0 ? (
             replaceFiles.map((file) => (
               <ReplaceFileModal
-                key={file.id}
+                key={file.replace.name}
                 folderId={folderId}
                 prevFileName={file.prevFileName}
                 newFile={file.replace}
@@ -193,8 +193,14 @@ const Files: AuthenticatedPage = ({ user }) => {
             folderFiles.map((file) => (
               <SingleFile
                 key={file.id}
+                fileId={file.id}
+                folderId={file.folderId}
                 fileName={file.fileName}
                 originalName={file.originalName}
+                accessByLink={file.accessByLink}
+                users={file.users}
+                ownerId={file.file_access.ownerId}
+                currentUser={user}
               />
             ))
           )}
