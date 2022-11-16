@@ -53,8 +53,7 @@ const UserAccessItem = ({
           user.id === ownerId ? user.username + ' (owner)' : user.username
         }
       />
-      {/* TODO: Show this button only if you are the owner of the file */}
-      {ownerId === currentUser.id ? (
+      {ownerId === currentUser.id && user.id !== currentUser.id ? (
         showConfirmDelete ? (
           <>
             <Button

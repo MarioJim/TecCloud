@@ -185,6 +185,34 @@ class FileController {
     };
   }
 
+  public changeGeneralAccess(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { fileName } = req.params;
+      const { userId } = req;
+      const generalAccess = req.body.generalAccess;
+      if (!fileName || !userId) {
+        return res.sendStatus(401);
+      }
+
+      const fileInfo = await File.findOne({ where: { fileName } });
+      if (!fileInfo) {
+        return res.sendStatus(404);
+      }
+
+      const user = await User.findByPk(userId);
+      if (!(user && (await fileInfo.ownedBy(user)))) {
+        return res.sendStatus(401);
+      }
+
+      if (generalAccess !== 'public' && generalAccess !== 'private') {
+        return res.sendStatus(400);
+      }
+
+      await fileInfo.update({ accessByLink: generalAccess });
+      res.sendStatus(200);
+    };
+  }
+
   public get(): RequestHandler {
     return async (req: Request, res: Response) => {
       const { folderId } = req.params;

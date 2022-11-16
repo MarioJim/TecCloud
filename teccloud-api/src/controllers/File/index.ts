@@ -29,6 +29,11 @@ router.post(
 );
 router.delete('/:fileName', auth, FileController.delete());
 router.get('/download/:fileName', auth, FileController.download());
+router.post(
+  '/change-access/:fileName',
+  auth,
+  FileController.changeGeneralAccess(),
+);
 router.get('/shared', auth, FileController.getShared());
 router.get('/:folderId', auth, FileController.get());
 
