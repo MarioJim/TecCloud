@@ -20,6 +20,7 @@ interface ShareDialogProps {
   originalName: string;
   accessByLink: 'private' | 'public';
   users: User[];
+  ownerId: number;
   currentUser: User;
 }
 
@@ -30,6 +31,7 @@ const ShareDialog = ({
   originalName,
   accessByLink,
   users,
+  ownerId,
   currentUser,
 }: ShareDialogProps) => {
   const [open, setOpen] = useState<boolean>(false);
@@ -40,11 +42,15 @@ const ShareDialog = ({
   return (
     <>
       <Button variant='contained' color='info' onClick={() => setOpen(true)}>
-        Share
+        {ownerId === currentUser.id ? <>Share</> : <>Shared with</>}
       </Button>
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth='sm'>
         <DialogTitle sx={{ fontWeight: 'bold' }}>
-          Share "{originalName}"
+          {ownerId == currentUser.id ? (
+            <>Share "{originalName}"</>
+          ) : (
+            <>Shared file: "{originalName}"</>
+          )}
         </DialogTitle>
         <DialogContent>
           <Stack
@@ -52,10 +58,14 @@ const ShareDialog = ({
             alignItems='flex-start'
             spacing={1}
           >
-            <ShareWithBar
-              fileName={fileName}
-              setUsers={(newUsers: User[]) => setUsersList(newUsers)}
-            />
+            {ownerId === currentUser.id ? (
+              <ShareWithBar
+                fileName={fileName}
+                setUsers={(newUsers: User[]) => setUsersList(newUsers)}
+              />
+            ) : (
+              <></>
+            )}
             <Box
               sx={{
                 width: '100%',
@@ -68,16 +78,23 @@ const ShareDialog = ({
                 fileName={fileName}
                 users={usersList}
                 setUsers={(newUsers: User[]) => setUsersList(newUsers)}
+                ownerId={ownerId}
                 currentUser={currentUser}
               />
             </Box>
-            <Typography sx={{ px: 1, fontWeight: 'bold' }}>
-              General access
-            </Typography>
-            <GeneralAccessSelect
-              fileName={fileName}
-              accessByLink={accessByLink}
-            />
+            {ownerId == currentUser.id ? (
+              <>
+                <Typography sx={{ px: 1, fontWeight: 'bold' }}>
+                  General access
+                </Typography>
+                <GeneralAccessSelect
+                  fileName={fileName}
+                  accessByLink={accessByLink}
+                />
+              </>
+            ) : (
+              <></>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions sx={{ marginRight: 2, marginBottom: 1 }}>

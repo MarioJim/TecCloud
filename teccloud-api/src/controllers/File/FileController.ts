@@ -2,7 +2,7 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { Response, RequestHandler, Request } from 'express';
 import { Multer, MulterError } from 'multer';
-import { File, Folder, User } from '../../db';
+import { File, FileAccess, Folder, User } from '../../db';
 import { iso88591_to_utf8, utf8_to_iso88591 } from '../../utils/encoding';
 import { get_file_server_path } from '../../utils/files';
 import { Op } from 'sequelize';
@@ -91,7 +91,9 @@ class FileController {
           ),
         )
           .then(async (savedFiles) => {
-            await user.addFiles(savedFiles);
+            await user.addFiles(savedFiles, {
+              through: { ownerId: userId },
+            });
             savedFiles = await user.getFiles({ include: [{ model: User }] });
             res.status(201).json({
               success: true,
@@ -144,10 +146,13 @@ class FileController {
 
   public shareWithUser(): RequestHandler {
     return async (req: Request, res: Response) => {
+      const { userId } = req;
       const otherUser = req.body.otherUser as User;
       const fileInfo = req.body.fileInfo as File;
 
-      await fileInfo.addUser(otherUser);
+      await fileInfo.addUser(otherUser, {
+        through: { ownerId: userId },
+      });
       const newFile = await File.findOne({
         where: { fileName: fileInfo.fileName },
         include: [
@@ -191,7 +196,7 @@ class FileController {
         return res.sendStatus(404);
       }
 
-      const files = await File.findAll({
+      const files = await user.getFiles({
         where: { folderId },
         include: [{ model: User }],
       });
@@ -203,6 +208,24 @@ class FileController {
         );
         res.json(files.filter((_, i) => filePermissions[i]));
       }
+    };
+  }
+
+  public getShared(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { userId } = req;
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return res.sendStatus(404);
+      }
+
+      const files = await user.getFiles({
+        where: { '$file_access.ownerId$': { [Op.ne]: userId } },
+        include: [{ model: User }],
+      });
+
+      res.json(files);
     };
   }
 

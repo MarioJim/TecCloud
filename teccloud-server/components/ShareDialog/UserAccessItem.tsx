@@ -13,6 +13,7 @@ interface UserAccessItemProps {
   fileName: string;
   user: User;
   setUsers: (users: User[]) => void;
+  ownerId: number;
   currentUser: User;
 }
 
@@ -20,6 +21,7 @@ const UserAccessItem = ({
   fileName,
   user,
   setUsers,
+  ownerId,
   currentUser,
 }: UserAccessItemProps) => {
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
@@ -47,37 +49,43 @@ const UserAccessItem = ({
             ? user.firstName + ' ' + user.lastName + ' (you)'
             : user.firstName + ' ' + user.lastName
         }
-        secondary={user.username}
+        secondary={
+          user.id === ownerId ? user.username + ' (owner)' : user.username
+        }
       />
       {/* TODO: Show this button only if you are the owner of the file */}
-      {showConfirmDelete ? (
-        <>
+      {ownerId === currentUser.id ? (
+        showConfirmDelete ? (
+          <>
+            <Button
+              variant='outlined'
+              color='error'
+              startIcon={<WarningIcon />}
+              onClick={handleDelete}
+              sx={{ marginRight: 1 }}
+            >
+              Yes?
+            </Button>
+            <Button
+              variant='outlined'
+              startIcon={<UndoIcon />}
+              onClick={() => setShowConfirmDelete(false)}
+            >
+              No
+            </Button>
+          </>
+        ) : (
           <Button
             variant='outlined'
             color='error'
-            startIcon={<WarningIcon />}
-            onClick={handleDelete}
-            sx={{ marginRight: 1 }}
+            startIcon={<DeleteIcon />}
+            onClick={() => setShowConfirmDelete(true)}
           >
-            Yes?
+            Delete
           </Button>
-          <Button
-            variant='outlined'
-            startIcon={<UndoIcon />}
-            onClick={() => setShowConfirmDelete(false)}
-          >
-            No
-          </Button>
-        </>
+        )
       ) : (
-        <Button
-          variant='outlined'
-          color='error'
-          startIcon={<DeleteIcon />}
-          onClick={() => setShowConfirmDelete(true)}
-        >
-          Delete
-        </Button>
+        <></>
       )}
     </ListItem>
   );

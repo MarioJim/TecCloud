@@ -7,6 +7,7 @@ interface UserAccessListProps {
   fileName: string;
   users: User[];
   setUsers: (users: User[]) => void;
+  ownerId: number;
   currentUser: User;
 }
 
@@ -14,6 +15,7 @@ const UserAccessList = ({
   fileName,
   users,
   setUsers,
+  ownerId,
   currentUser,
 }: UserAccessListProps) => {
   return (
@@ -25,6 +27,7 @@ const UserAccessList = ({
             fileName={fileName}
             user={user}
             setUsers={setUsers}
+            ownerId={ownerId}
             currentUser={currentUser}
           />
         ))
