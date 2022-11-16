@@ -47,9 +47,9 @@ const ShareDialog = ({
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth='sm'>
         <DialogTitle sx={{ fontWeight: 'bold' }}>
           {ownerId == currentUser.id ? (
-            <>Share "{originalName}"</>
+            <>Share &quot;{originalName}&quot;</>
           ) : (
-            <>Shared file: "{originalName}"</>
+            <>Shared file: &quot;{originalName}&quot;</>
           )}
         </DialogTitle>
         <DialogContent>
