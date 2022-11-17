@@ -34,7 +34,7 @@ File.belongsTo(Folder, { onDelete: 'cascade' });
 User.belongsToMany(File, { through: FileAccess });
 File.belongsToMany(User, { through: FileAccess });
 
-File.hasMany(Page);
-Page.belongsTo(File);
+File.hasMany(Page, { onDelete: 'cascade' });
+Page.belongsTo(File, { onDelete: 'cascade' });
 
 export { File, FileAccess, Folder, Page, User };
