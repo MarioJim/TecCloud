@@ -5,6 +5,7 @@ import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import { apiServer } from '../config';
 
 interface DeleteFileModalProps {
   fileName: string;
@@ -17,7 +18,7 @@ const DeleteFileModal = ({ fileName, originalName }: DeleteFileModalProps) => {
 
   const deleteFile = async () => {
     try {
-      await fetch(`http://localhost:3001/files/${fileName}`, {
+      await fetch(`${apiServer}/files/${fileName}`, {
         method: 'delete',
         credentials: 'include',
       });

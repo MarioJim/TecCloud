@@ -6,6 +6,7 @@ import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import { apiServer } from '../config';
 
 interface ReplaceFileModalProps {
   folderId: number;
@@ -34,19 +35,16 @@ const ReplaceFileModal = ({
       formData.set('folderId', `${folderId}`);
       formData.append('files', newFile);
 
-      await axios.delete(`http://localhost:3001/files/${prevFileName}`, {
+      await axios.delete(`${apiServer}/files/${prevFileName}`, {
         withCredentials: true,
       });
-      await axios.post('http://localhost:3001/files/upload', formData, {
+      await axios.post(`${apiServer}/files/upload`, formData, {
         withCredentials: true,
       });
 
-      const response = await axios.get(
-        `http://localhost:3001/files/${folderId}`,
-        {
-          withCredentials: true,
-        },
-      );
+      const response = await axios.get(`${apiServer}/files/${folderId}`, {
+        withCredentials: true,
+      });
 
       removeFile(newFile.name);
       setFolderFiles(response.data);

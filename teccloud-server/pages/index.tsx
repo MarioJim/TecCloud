@@ -5,9 +5,10 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Link from 'next/link';
+import { apiServer } from '../config';
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const res = await fetch('http://localhost:3001/user/auth', {
+  const res = await fetch(`${apiServer}/user/auth`, {
     credentials: 'include',
     headers: ctx.req.headers as HeadersInit,
   });
