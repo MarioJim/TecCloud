@@ -14,6 +14,7 @@ export class FileAccess extends Model<
   declare id: CreationOptional<number>;
   declare fileId: number;
   declare userId: number;
+  declare ownerId: number;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 }
@@ -41,6 +42,10 @@ FileAccess.init(
       },
       allowNull: false,
     },
+    ownerId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     createdAt: DataTypes.DATE,
     updatedAt: DataTypes.DATE,
   },
@@ -48,6 +53,6 @@ FileAccess.init(
     sequelize,
     modelName: 'file_access',
     timestamps: true,
-    indexes: [{ fields: ['fileId', 'userId'] }],
+    indexes: [{ fields: ['fileId', 'userId', 'ownerId'] }],
   },
 );

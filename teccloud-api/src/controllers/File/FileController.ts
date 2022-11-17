@@ -2,7 +2,7 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { Response, RequestHandler, Request } from 'express';
 import { Multer, MulterError } from 'multer';
-import { File, Folder, User } from '../../db';
+import { File, FileAccess, Folder, User } from '../../db';
 import { iso88591_to_utf8, utf8_to_iso88591 } from '../../utils/encoding';
 import { get_file_server_path } from '../../utils/files';
 import { Op } from 'sequelize';
@@ -12,6 +12,11 @@ class FileController {
     return async (req: Request, res: Response) => {
       const { userId } = req;
       if (!userId) {
+        return res.sendStatus(401);
+      }
+
+      const user = await User.findByPk(userId);
+      if (!user) {
         return res.sendStatus(401);
       }
 
@@ -85,7 +90,11 @@ class FileController {
             }),
           ),
         )
-          .then((savedFiles) => {
+          .then(async (savedFiles) => {
+            await user.addFiles(savedFiles, {
+              through: { ownerId: userId },
+            });
+            savedFiles = await user.getFiles({ include: [{ model: User }] });
             res.status(201).json({
               success: true,
               message: 'Files uploaded successfully',
@@ -135,6 +144,75 @@ class FileController {
     };
   }
 
+  public shareWithUser(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { userId } = req;
+      const otherUser = req.body.otherUser as User;
+      const fileInfo = req.body.fileInfo as File;
+
+      await fileInfo.addUser(otherUser, {
+        through: { ownerId: userId },
+      });
+      const newFile = await File.findOne({
+        where: { fileName: fileInfo.fileName },
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'firstName', 'lastName', 'username', 'folderId'],
+          },
+        ],
+      });
+      res.json(newFile);
+    };
+  }
+
+  public unshareWithUser(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const otherUser = req.body.otherUser as User;
+      const fileInfo = req.body.fileInfo as File;
+
+      await fileInfo.removeUser(otherUser);
+      const newFile = await File.findOne({
+        where: { fileName: fileInfo.fileName },
+        include: [
+          {
+            model: User,
+            attributes: ['id', 'firstName', 'lastName', 'username', 'folderId'],
+          },
+        ],
+      });
+      res.json(newFile);
+    };
+  }
+
+  public changeGeneralAccess(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { fileName } = req.params;
+      const { userId } = req;
+      const generalAccess = req.body.generalAccess;
+      if (!fileName || !userId) {
+        return res.sendStatus(401);
+      }
+
+      const fileInfo = await File.findOne({ where: { fileName } });
+      if (!fileInfo) {
+        return res.sendStatus(404);
+      }
+
+      const user = await User.findByPk(userId);
+      if (!(user && (await fileInfo.ownedBy(user)))) {
+        return res.sendStatus(401);
+      }
+
+      if (generalAccess !== 'public' && generalAccess !== 'private') {
+        return res.sendStatus(400);
+      }
+
+      await fileInfo.update({ accessByLink: generalAccess });
+      res.sendStatus(200);
+    };
+  }
+
   public get(): RequestHandler {
     return async (req: Request, res: Response) => {
       const { folderId } = req.params;
@@ -146,17 +224,42 @@ class FileController {
         return res.sendStatus(404);
       }
 
-      let files = await File.findAll({ where: { folderId } });
-      if (!(await folder.isOwnedBy(user))) {
+      const folders = await Folder.findAll({ where: { parentId: folderId } });
+
+      const files = await user.getFiles({
+        where: { folderId },
+        include: [{ model: User }],
+      });
+      if (await folder.isOwnedBy(user)) {
+        res.json({ files: files, folders: folders, parentId: folder.parentId });
+      } else {
         const filePermissions = await Promise.all(
           files.map((file) => file.viewableBy(user)),
         );
-        files = files.filter((_, i) => filePermissions[i]);
+        res.json({
+          files: files.filter((_, i) => filePermissions[i]),
+          folders: folders,
+          parentId: folder.parentId,
+        });
+      }
+    };
+  }
+
+  public getShared(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { userId } = req;
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return res.sendStatus(404);
       }
 
-      let folders = await Folder.findAll({ where: { parentId: folderId } });
+      const files = await user.getFiles({
+        where: { '$file_access.ownerId$': { [Op.ne]: userId } },
+        include: [{ model: User }],
+      });
 
-      res.json({ files: files, folders: folders, parentId: folder.parentId });
+      res.json(files);
     };
   }
 
