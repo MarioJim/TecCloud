@@ -69,8 +69,6 @@ const Files: AuthenticatedPage = ({ user }) => {
       setFolderFiles(filesJson.files);
       setFolders(filesJson.folders);
       setParentId(filesJson.parentId);
-      console.log(filesJson);
-      console.log(filesJson.folders);
     };
 
     fetchFiles().catch(console.error);

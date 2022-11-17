@@ -232,14 +232,12 @@ class FileController {
         include: [{ model: User }],
       });
       if (await folder.isOwnedBy(user)) {
-        console.log('heeeeeeeereeeeeeeeeeeeeeeeeee');
         res.json({
           files: files,
           folders: folders,
           parentId: folder.parentId,
         });
       } else {
-        console.log('hooooooooooooooooooooroooooooooooooo');
         const filePermissions = await Promise.all(
           files.map((file) => file.viewableBy(user)),
         );
