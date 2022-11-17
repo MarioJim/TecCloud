@@ -1,17 +1,34 @@
 import Box from '@mui/material/Box';
+import type { User } from '../types';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import DeleteFileModal from './DeleteFileModal';
 import { apiServer } from '../config';
+import ShareDialog from './ShareDialog';
 
 interface SingleFileProps {
+  fileId: number;
+  folderId: number;
   fileName: string;
   originalName: string;
+  accessByLink: 'private' | 'public';
+  users: User[];
+  ownerId: number;
+  currentUser: User;
 }
 
-const SingleFile = ({ fileName, originalName }: SingleFileProps) => (
+const SingleFile = ({
+  fileId,
+  folderId,
+  fileName,
+  originalName,
+  accessByLink,
+  users,
+  ownerId,
+  currentUser,
+}: SingleFileProps) => (
   <Box
     sx={{
       height: '54px',
@@ -42,9 +59,25 @@ const SingleFile = ({ fileName, originalName }: SingleFileProps) => (
       <Stack
         direction='row'
         justifyContent='flex-end'
-        sx={{ width: 0.4, paddingRight: 2 }}
+        spacing={1}
+        sx={{ width: 0.4 }}
       >
         <DeleteFileModal fileName={fileName} originalName={originalName} />
+        <ShareDialog
+          fileId={fileId}
+          folderId={folderId}
+          fileName={fileName}
+          originalName={originalName}
+          accessByLink={accessByLink}
+          users={users}
+          ownerId={ownerId}
+          currentUser={currentUser}
+        />
+        {ownerId === currentUser.id ? (
+          <DeleteFileModal fileName={fileName} originalName={originalName} />
+        ) : (
+          <></>
+        )}
       </Stack>
     </Stack>
   </Box>

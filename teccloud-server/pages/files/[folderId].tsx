@@ -69,6 +69,8 @@ const Files: AuthenticatedPage = ({ user }) => {
       setFolderFiles(filesJson.files);
       setFolders(filesJson.folders);
       setParentId(filesJson.parentId);
+      console.log(filesJson);
+      console.log(filesJson.folders);
     };
 
     fetchFiles().catch(console.error);
@@ -173,7 +175,7 @@ const Files: AuthenticatedPage = ({ user }) => {
           {replaceFiles.length > 0 ? (
             replaceFiles.map((file) => (
               <ReplaceFileModal
-                key={file.id}
+                key={file.replace.name}
                 folderId={folderId}
                 prevFileName={file.prevFileName}
                 newFile={file.replace}
@@ -219,7 +221,7 @@ const Files: AuthenticatedPage = ({ user }) => {
               </Stack>
             </Box>
           )}
-          {folderFiles.length == 0 && folders.length == 0 && (
+          {/* {folderFiles.length == 0 && folders.length == 0 && (
             <>
               <Typography paragraph>
                 Oops... it seems there are no files here :(
@@ -246,10 +248,16 @@ const Files: AuthenticatedPage = ({ user }) => {
             folderFiles.map((file) => (
               <SingleFile
                 key={`file-${file.id}`}
+                fileId={file.id}
+                folderId={file.folderId}
                 fileName={file.fileName}
                 originalName={file.originalName}
+                accessByLink={file.accessByLink}
+                users={file.users}
+                ownerId={file.file_access.ownerId}
+                currentUser={user}
               />
-            ))}
+            ))} */}
         </Box>
       </Scaffold>
     </Fragment>
