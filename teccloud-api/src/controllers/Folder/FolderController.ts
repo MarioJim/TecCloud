@@ -1,6 +1,6 @@
 import fsPromises from 'fs/promises';
 import { Response, RequestHandler, Request } from 'express';
-import { File, Folder, User } from '../../db';
+import { File, Folder, User, sequelize } from '../../db';
 import { get_file_server_path } from '../../utils/files';
 
 class FolderController {
@@ -23,25 +23,27 @@ class FolderController {
         });
       }
 
-      Promise.resolve(
-        Folder.create({
-          parentId: parseInt(folderId),
-          name: folderName,
-        }),
-      )
-        .then((folder) => {
-          res.status(201).json({
-            success: true,
-            message: 'Folder created successfully',
-            folder: folder,
-          });
-        })
-        .catch((e) => {
-          res.status(500).json({
-            success: false,
-            message: `Error creating folder`,
-          });
+      let folder;
+      try {
+        folder = await sequelize.transaction(async (t) => {
+          const folder = await Folder.create(
+            {
+              parentId: parseInt(folderId),
+              name: folderName,
+            },
+            { transaction: t },
+          );
+          return folder;
         });
+      } catch (error) {
+        return res.status(500).json({ error: 'Error creating folder.' });
+      }
+
+      res.status(201).json({
+        success: true,
+        message: 'Folder created successfully',
+        folder: folder,
+      });
     };
   }
 

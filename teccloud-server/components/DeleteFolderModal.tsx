@@ -5,7 +5,6 @@ import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import { setFips } from 'crypto';
 
 interface DeleteFolderModalProps {
   folderId: number;

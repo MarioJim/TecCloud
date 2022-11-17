@@ -23,7 +23,8 @@ const SidebarAddFolder = ({ folderId, setFolders }: SidebarAddFolderProps) => {
   const [error, setError] = useState<boolean>(false);
   const handleClose = () => setOpen(false);
 
-  const createFolder: (e: React.FormEvent) => void = async (e) => {
+  //const createFolder: (e: React.FormEvent) => void = async (e) => {
+  const createFolder = async (e: React.FormEvent): Promise<any> => {
     e.preventDefault();
     const target = e.target as typeof e.target & {
       folderName: { value: string };

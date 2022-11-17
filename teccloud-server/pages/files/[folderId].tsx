@@ -233,7 +233,7 @@ const Files: AuthenticatedPage = ({ user }) => {
           {folders.length > 0 &&
             folders.map((folder) => (
               <SingleFolder
-                key={folder.id + 1000}
+                key={`folder-${folder.id}`}
                 folderId={folder.id}
                 folderName={folder.name}
                 folders={folders}
@@ -247,7 +247,7 @@ const Files: AuthenticatedPage = ({ user }) => {
           {folderFiles.length > 0 &&
             folderFiles.map((file) => (
               <SingleFile
-                key={file.id + 1000}
+                key={`file-${file.id}`}
                 fileName={file.fileName}
                 originalName={file.originalName}
               />
