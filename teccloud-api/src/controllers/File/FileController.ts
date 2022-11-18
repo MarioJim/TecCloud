@@ -303,11 +303,7 @@ class FileController {
       }
 
       try {
-<<<<<<< HEAD
-        await file.update({ originalName: [newFileName, ext].join('.') });
-=======
         await file.update({ originalName: updatedFileName });
->>>>>>> b7636aec46487258632608a66b4955e4be344610
 
         res.status(200).send({
           message: 'File updated.',
