@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useEffect, useRef, useState } from 'react';
-import DeleteFolderModal from './DeleteFolderModal';
+import FolderModal from './FolderModal';
 
 interface SingleFolderProps {
   folderId: number;
@@ -40,6 +40,7 @@ const SingleFolder = ({
   folders,
   setFolders,
 }: SingleFolderProps) => {
+  const [currentName, setCurrentName] = useState<any>(folderName);
   const [folderColor, setFolderColor] = useState<any>(blue[50]);
 
   const handleClickOutside = () => {
@@ -84,17 +85,19 @@ const SingleFolder = ({
           <FolderIcon fontSize='inherit' />
         </IconButton>
         <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
-          {folderName}
+          {currentName}
         </Typography>
         <Stack
           direction='row'
           justifyContent='flex-end'
+          spacing={1}
           sx={{ width: 0.4, paddingRight: 2 }}
         >
-          <DeleteFolderModal
+          <FolderModal
             folderId={folderId}
             folderName={folderName}
             folders={folders}
+            setCurrentName={setCurrentName}
             setFolders={setFolders}
           />
         </Stack>

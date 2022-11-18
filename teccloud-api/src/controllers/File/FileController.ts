@@ -25,7 +25,7 @@ class FileController {
           if (error.code === 'LIMIT_FILE_SIZE') {
             return res.status(413).json({
               success: false,
-              message: `File too large`,
+              message: 'File too large',
             });
           } else {
             return res.status(500).json({
@@ -271,7 +271,7 @@ class FileController {
     return async (req: Request, res: Response) => {
       const { folderId, fileName, originalName, newFileName } = req.body;
       const { userId } = req;
-      if (!fileName || !userId) {
+      if (!folderId || !fileName || !originalName || !newFileName || !userId) {
         return res.sendStatus(401);
       }
 
@@ -279,28 +279,31 @@ class FileController {
       const ext = re.exec(originalName)![1];
       const updatedFileName = [newFileName, ext].join('.');
 
+      const file = await File.findOne({ where: { fileName } });
+      if (!file) {
+        return res.sendStatus(404).json({
+          success: false,
+          message: 'File not found.',
+        });
+      }
+
       const files = await File.findAll({
         where: { folderId: folderId, originalName: updatedFileName },
       });
       if (files.length !== 0) {
         return res.status(401).json({
           success: false,
-          message: `File with same name already exists`,
+          message: 'File with same name already exists.',
         });
       }
 
-      const fileInfo = await File.findOne({ where: { fileName } });
-      if (!fileInfo) {
-        return res.sendStatus(404);
-      }
-
       const user = await User.findByPk(userId);
-      if (!(user && (await fileInfo.ownedBy(user)))) {
+      if (!(user && (await file.ownedBy(user)))) {
         return res.sendStatus(403);
       }
 
       try {
-        await fileInfo.update({ originalName: [newFileName, ext].join('.') });
+        await file.update({ originalName: [newFileName, ext].join('.') });
 
         res.status(200).send({
           message: 'File updated.',

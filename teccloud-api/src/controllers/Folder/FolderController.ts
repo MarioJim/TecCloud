@@ -19,7 +19,7 @@ class FolderController {
       if (folders.length !== 0) {
         return res.status(401).json({
           success: false,
-          message: `Folder with same name already exists`,
+          message: 'Folder with same name already exists.',
         });
       }
 
@@ -41,9 +41,58 @@ class FolderController {
 
       res.status(201).json({
         success: true,
-        message: 'Folder created successfully',
+        message: 'Folder created successfully.',
         folder: folder,
       });
+    };
+  }
+
+  public rename(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { folderId, folderName, newFolderName } = req.body;
+      const { userId } = req;
+      if (!folderId || !folderName || !newFolderName || !userId) {
+        return res.sendStatus(401);
+      }
+
+      const folder = await Folder.findOne({ where: { id: folderId } });
+      if (!folder) {
+        return res.sendStatus(404).json({
+          success: false,
+          message: 'Folder not found.',
+        });
+      }
+
+      const folders = await Folder.findAll({
+        where: { parentId: folder.parentId, name: newFolderName },
+      });
+      if (folders.length !== 0) {
+        return res.status(401).json({
+          success: false,
+          message: 'Folder with same name already exists.',
+        });
+      }
+
+      const user = await User.findByPk(userId);
+      if (!(user && (await folder.isOwnedBy(user)))) {
+        return res.status(401).json({
+          success: false,
+          message: 'Folder not owned by user.',
+        });
+      }
+
+      try {
+        await folder.update({ name: newFolderName });
+
+        res.status(200).send({
+          success: true,
+          message: 'File updated.',
+        });
+      } catch (err) {
+        res.status(500).send({
+          message: 'Could not update file.\n' + err,
+        });
+      }
     };
   }
 
@@ -54,7 +103,7 @@ class FolderController {
       if (!folderId || !userId) {
         return res.status(401).json({
           success: false,
-          message: 'Folder or user not provided',
+          message: 'Folder or user not provided.',
         });
       }
 
@@ -62,7 +111,7 @@ class FolderController {
       if (!folder) {
         return res.status(404).json({
           success: false,
-          message: 'Folder not found',
+          message: 'Folder not found.',
         });
       }
 
@@ -70,23 +119,23 @@ class FolderController {
       if (!(user && (await folder.isOwnedBy(user)))) {
         return res.status(401).json({
           success: false,
-          message: 'Folder not owned by user',
+          message: 'Folder not owned by user.',
         });
       }
 
       try {
         let folder = await Folder.findByPk(folderId);
         folder?.destroy();
+
+        res.status(200).send({
+          success: true,
+          message: 'Folder deleted.',
+        });
       } catch (err) {
         return res.status(500).send({
           message: 'Could not retrieve folders.\n' + err,
         });
       }
-
-      return res.status(200).json({
-        success: true,
-        message: 'Test passed',
-      });
     };
   }
 }
