@@ -5,6 +5,8 @@ import { Fragment, useCallback, useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useDropzone } from 'react-dropzone';
 import Scaffold from '../../components/Scaffold';
