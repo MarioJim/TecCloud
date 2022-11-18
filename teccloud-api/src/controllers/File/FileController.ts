@@ -226,26 +226,18 @@ class FileController {
 
       const folders = await Folder.findAll({ where: { parentId: folderId } });
 
-      const files = await user.getFiles({
+      let files = await user.getFiles({
         where: { folderId },
         include: [{ model: User }],
       });
-      if (await folder.isOwnedBy(user)) {
-        res.json({
-          files: files,
-          folders: folders,
-          parentId: folder.parentId,
-        });
-      } else {
+      if (!(await folder.isOwnedBy(user))) {
         const filePermissions = await Promise.all(
           files.map((file) => file.viewableBy(user)),
         );
-        res.json({
-          files: files.filter((_, i) => filePermissions[i]),
-          folders: folders,
-          parentId: folder.parentId,
-        });
+        files = files.filter((_, i) => filePermissions[i]);
       }
+
+      res.json({ files, folders, parentId: folder.parentId });
     };
   }
 
@@ -303,7 +295,7 @@ class FileController {
       }
 
       try {
-        await file.update({ originalName: [newFileName, ext].join('.') });
+        await file.update({ originalName: updatedFileName });
 
         res.status(200).send({
           message: 'File updated.',
