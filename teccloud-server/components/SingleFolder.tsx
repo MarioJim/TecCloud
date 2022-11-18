@@ -15,7 +15,7 @@ interface SingleFolderProps {
 }
 
 const useOutsideClick = (callback: any) => {
-  const ref = useRef();
+  const ref = useRef<any>();
 
   useEffect(() => {
     const handleClick = (e: any) => {
