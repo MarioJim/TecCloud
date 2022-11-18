@@ -19,7 +19,7 @@ interface SingleFileProps {
   users: User[];
   ownerId: number;
   currentUser: User;
-  setAsDeletingFile: Dispatch<SetStateAction<DeletingFile | null>>;
+  setAsDeletingFile?: Dispatch<SetStateAction<DeletingFile | null>>;
 }
 
 const SingleFile = ({
@@ -76,7 +76,7 @@ const SingleFile = ({
           ownerId={ownerId}
           currentUser={currentUser}
         />
-        {ownerId === currentUser.id && (
+        {setAsDeletingFile && (
           <Button
             variant='contained'
             color='error'
