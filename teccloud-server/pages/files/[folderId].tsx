@@ -20,7 +20,7 @@ import ReplaceFileModal from '../../components/ReplaceFileModal';
 import { apiServer } from '../../config';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
-  const res = await fetch(`${apiServer}/user/auth`, {
+  const res = await fetch(`${apiServer}/user/auth/${ctx.params!.folderId}`, {
     credentials: 'include',
     headers: ctx.req.headers as HeadersInit,
   });

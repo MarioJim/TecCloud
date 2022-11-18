@@ -5,7 +5,7 @@ import { apiServer } from '../../config';
 
 /// Should always redirect somewhere
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
-  const res = await fetch(`${apiServer}/user/auth`, {
+  const res = await fetch(`${apiServer}/user/auth/0`, {
     credentials: 'include',
     headers: ctx.req.headers as HeadersInit,
   });
