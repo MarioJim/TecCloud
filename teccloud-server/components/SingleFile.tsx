@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import type { User } from '../types';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import DeleteFileModal from './DeleteFileModal';
+import FileModal from './FileModal';
 import { apiServer } from '../config';
 import ShareDialog from './ShareDialog';
 
@@ -28,58 +29,67 @@ const SingleFile = ({
   users,
   ownerId,
   currentUser,
-}: SingleFileProps) => (
-  <Box
-    sx={{
-      height: '54px',
-      borderTop: 1,
-      borderBottom: 1,
-      borderColor: 'primary.main',
-      alignItems: 'center',
-      margin: '5px',
-    }}
-  >
-    <Stack
-      direction='row'
-      justifyContent='flex-start'
-      alignItems='center'
-      spacing={1}
+}: SingleFileProps) => {
+  const [currentName, setCurrentName] = useState<any>(originalName);
+
+  return (
+    <Box
+      sx={{
+        height: '54px',
+        borderTop: 1,
+        borderBottom: 1,
+        borderColor: 'primary.main',
+        alignItems: 'center',
+        margin: '5px',
+      }}
     >
-      <IconButton
-        aria-label='download'
-        size='large'
-        target='_blank'
-        href={`${apiServer}/files/download/${fileName}`}
-      >
-        <DownloadForOfflineIcon fontSize='inherit' />
-      </IconButton>
-      <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
-        {originalName}
-      </Typography>
       <Stack
         direction='row'
-        justifyContent='flex-end'
+        justifyContent='flex-start'
+        alignItems='center'
         spacing={1}
-        sx={{ width: 0.4 }}
       >
-        <ShareDialog
-          fileId={fileId}
-          folderId={folderId}
-          fileName={fileName}
-          originalName={originalName}
-          accessByLink={accessByLink}
-          users={users}
-          ownerId={ownerId}
-          currentUser={currentUser}
-        />
-        {ownerId === currentUser.id ? (
-          <DeleteFileModal fileName={fileName} originalName={originalName} />
-        ) : (
-          <></>
-        )}
+        <IconButton
+          aria-label='download'
+          size='large'
+          target='_blank'
+          href={`${apiServer}/files/download/${fileName}`}
+        >
+          <DownloadForOfflineIcon fontSize='inherit' />
+        </IconButton>
+        <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
+          {currentName}
+        </Typography>
+        <Stack
+          direction='row'
+          justifyContent='flex-end'
+          spacing={1}
+          sx={{ width: 0.4, paddingRight: 2 }}
+        >
+          <ShareDialog
+            fileId={fileId}
+            folderId={folderId}
+            fileName={fileName}
+            originalName={originalName}
+            accessByLink={accessByLink}
+            users={users}
+            ownerId={ownerId}
+            currentUser={currentUser}
+          />
+          {ownerId === currentUser.id ? (
+            <FileModal
+              folderId={folderId}
+              fileName={fileName}
+              originalName={currentName}
+              setCurrentName={setCurrentName}
+            />
+          ) : (
+            <></>
+          )}
+        </Stack>
       </Stack>
-    </Stack>
-  </Box>
-);
+    </Box>
+  );
+};
 
 export default SingleFile;

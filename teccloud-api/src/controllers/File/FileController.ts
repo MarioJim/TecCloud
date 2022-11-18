@@ -215,7 +215,6 @@ class FileController {
 
   public get(): RequestHandler {
     return async (req: Request, res: Response) => {
-      console.log('k, at least go here');
       const { folderId } = req.params;
       const { userId } = req;
 
@@ -252,7 +251,6 @@ class FileController {
 
   public getShared(): RequestHandler {
     return async (req: Request, res: Response) => {
-      console.log('got hereeeeeeeeeeeeeeeeeee');
       const { userId } = req;
 
       const user = await User.findByPk(userId);
@@ -266,6 +264,53 @@ class FileController {
       });
 
       res.json(files);
+    };
+  }
+
+  public rename(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { folderId, fileName, originalName, newFileName } = req.body;
+      const { userId } = req;
+      if (!fileName || !userId) {
+        return res.sendStatus(401);
+      }
+
+      const re = /(?:\.([^.]+))?$/;
+      const ext = re.exec(originalName)![1];
+      const updatedFileName = [newFileName, ext].join('.');
+
+      const files = await File.findAll({
+        where: { folderId: folderId, originalName: updatedFileName },
+      });
+      if (files.length !== 0) {
+        return res.status(401).json({
+          success: false,
+          message: `File with same name already exists`,
+        });
+      }
+
+      const fileInfo = await File.findOne({ where: { fileName } });
+      if (!fileInfo) {
+        return res.sendStatus(404);
+      }
+
+      const user = await User.findByPk(userId);
+      if (!(user && (await fileInfo.ownedBy(user)))) {
+        return res.sendStatus(403);
+      }
+
+      try {
+        await fileInfo.update({ originalName: [newFileName, ext].join('.') });
+
+        res.status(200).send({
+          message: 'File updated.',
+          updatedFileName: updatedFileName,
+        });
+      } catch (err) {
+        res.status(500).send({
+          message: 'Could not update file.\n' + err,
+        });
+      }
     };
   }
 

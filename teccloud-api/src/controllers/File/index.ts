@@ -27,6 +27,7 @@ router.post(
   shareChecks,
   FileController.unshareWithUser(),
 );
+router.put('/rename', auth, FileController.rename());
 router.delete('/:fileName', auth, FileController.delete());
 router.get('/download/:fileName', auth, FileController.download());
 router.post(

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiServer } from '../config';
 import Box from '@mui/material/Box';
 import Fade from '@mui/material/Fade';
 import Modal from '@mui/material/Modal';
@@ -24,7 +25,7 @@ const DeleteFolderModal = ({
 
   const deleteFolder = async () => {
     try {
-      await fetch(`http://localhost:3001/folder/${folderId}`, {
+      await fetch(`${apiServer}/folder/${folderId}`, {
         method: 'delete',
         credentials: 'include',
       });
@@ -81,11 +82,11 @@ const DeleteFolderModal = ({
               alignItems='center'
               spacing={1}
             >
-              <Button variant='contained' color='error' onClick={deleteFolder}>
-                Yes, delete now
-              </Button>
               <Button variant='contained' color='primary' onClick={handleClose}>
                 No, go back
+              </Button>
+              <Button variant='contained' color='error' onClick={deleteFolder}>
+                Yes, delete now
               </Button>
             </Stack>
           </Box>
