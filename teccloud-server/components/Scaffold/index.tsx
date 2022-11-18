@@ -7,14 +7,15 @@ import SearchBar from './SearchBar';
 import { User } from '../../types';
 
 interface ScaffoldProps {
+  children: React.ReactNode;
   user: User;
   folderId?: number;
-  children: React.ReactNode;
   folderFiles?: any[];
   folders?: any[];
   setFolderFiles?: (files: any[]) => void;
   setReplaceFiles?: (files: any[]) => void;
   setFolders?: (folder: any) => void;
+  onSearchQueryChanged?: (query: string) => void;
 }
 
 const Scaffold = ({
@@ -26,6 +27,7 @@ const Scaffold = ({
   setFolderFiles,
   setReplaceFiles,
   setFolders,
+  onSearchQueryChanged,
 }: ScaffoldProps) => (
   <Box sx={{ display: 'flex' }}>
     <AppBar
@@ -37,7 +39,12 @@ const Scaffold = ({
           TecCloud
         </Typography>
 
-        {folderId !== undefined && <SearchBar folderId={folderId} />}
+        {folderId !== undefined && onSearchQueryChanged !== undefined && (
+          <SearchBar
+            folderId={folderId}
+            onSearchQueryChanged={onSearchQueryChanged}
+          />
+        )}
 
         <Typography variant='h6' noWrap component='div'>
           {user.username}

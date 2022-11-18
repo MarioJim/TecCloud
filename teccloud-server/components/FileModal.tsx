@@ -6,11 +6,13 @@ import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import { apiServer } from '../config';
 import TextField from '@mui/material/TextField';
 import Collapse from '@mui/material/Collapse';
 import Alert from '@mui/material/Alert';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
 import AlertTitle from '@mui/material/AlertTitle';
+import { apiServer } from '../config';
 
 interface FileModalProps {
   folderId: number;
@@ -140,13 +142,9 @@ const FileModal = ({
           </Box>
         </Fade>
       </Modal>
-      <Button
-        variant='contained'
-        color='error'
-        onClick={() => setOpenDelete(true)}
-      >
-        Delete
-      </Button>
+      <IconButton size='medium' onClick={() => setOpenDelete(true)}>
+        <DeleteIcon fontSize='inherit' />
+      </IconButton>
       <Modal open={openDelete} onClose={handleCloseDelete}>
         <Fade in={openDelete}>
           <Box

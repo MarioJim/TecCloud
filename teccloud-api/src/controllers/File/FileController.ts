@@ -354,6 +354,39 @@ class FileController {
     };
   }
 
+  public searchInFolder(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { folderId } = req.params;
+      const { q } = req.query;
+      const { userId } = req;
+
+      const folder = await Folder.findByPk(folderId);
+      const user = await User.findByPk(userId);
+      if (!folder || !user || !q || typeof q !== 'string') {
+        return res.sendStatus(404);
+      }
+
+      let files = await File.findAll({
+        where: { folderId },
+        include: [{ association: PagesOnAFile, as: 'pages' }],
+      });
+      if (!(await folder.isOwnedBy(user))) {
+        const filePermissions = await Promise.all(
+          files.map((file) => file.viewableBy(user)),
+        );
+        files = files.filter((_, i) => filePermissions[i]);
+      } else {
+      }
+
+      const pages = files
+        .flatMap((file) =>
+          (file as any).pages.map((page: any) => ({ ...page, file })),
+        )
+        .filter((page) => (page.content as string).match(q));
+      res.json(pages);
+    };
+  }
+
   public delete(): RequestHandler {
     return async (req: Request, res: Response) => {
       const { fileName } = req.params;

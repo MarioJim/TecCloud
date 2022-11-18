@@ -1,9 +1,11 @@
-import TextField, { TextFieldProps } from '@mui/material/TextField';
-import styled from '@emotion/styled';
 import { useState } from 'react';
+import styled from '@emotion/styled';
+import TextField, { TextFieldProps } from '@mui/material/TextField';
 import { OutlinedInputProps } from '@mui/material/OutlinedInput';
+import IconButton from '@mui/material/IconButton';
+import ClearIcon from '@mui/icons-material/Clear';
 
-const RedditTextField = styled((props: TextFieldProps) => (
+const StyledTextField = styled((props: TextFieldProps) => (
   <TextField
     InputProps={{ disableUnderline: true } as Partial<OutlinedInputProps>}
     {...props}
@@ -27,21 +29,35 @@ const RedditTextField = styled((props: TextFieldProps) => (
     },
   },
 }));
+
 interface SearchBarProps {
-  folderId?: number;
+  folderId: number;
+  onSearchQueryChanged: (query: string) => void;
 }
 
-const SearchBar = ({ folderId }: SearchBarProps) => {
+const SearchBar = ({ folderId, onSearchQueryChanged }: SearchBarProps) => {
   const [value, setValue] = useState('');
-  console.log(`Should search for ${value} in folder ${folderId}`);
 
   return (
-    <RedditTextField
+    <StyledTextField
       color='info'
       placeholder='Search in your files...'
       variant='filled'
       value={value}
       onChange={(e) => setValue(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onSearchQueryChanged(value);
+      }}
+      InputProps={{
+        endAdornment: (
+          <IconButton
+            sx={{ visibility: value ? 'visible' : 'hidden' }}
+            onClick={() => setValue('')}
+          >
+            <ClearIcon />
+          </IconButton>
+        ),
+      }}
     />
   );
 };

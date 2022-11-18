@@ -44,7 +44,7 @@ const thumbnailFromFileInfo = (file: any): string | undefined => {
   if (file.fileType.startsWith('image/')) {
     return `${apiServer}/files/download/${file.fileName}`;
   }
-  for (const page of file.pages) {
+  for (const page of file.pages || []) {
     if (page.thumbnailPath) {
       return `${apiServer}/files/thumbnail/${page.thumbnailPath}`;
     }
@@ -61,6 +61,7 @@ const Files: AuthenticatedPage = ({ user }) => {
       router.push(`/files/${user.folderId}`);
     }
   }, [router, folderId, user.folderId]);
+  const searchQuery = router.query.q;
 
   const [numberDraggedFiles, setNumberDraggedFiles] = useState<number>(0);
   const [folderFiles, setFolderFiles] = useState<any[]>([]);
@@ -73,7 +74,11 @@ const Files: AuthenticatedPage = ({ user }) => {
 
   useEffect(() => {
     const fetchFiles = async () => {
-      const filesResponse = await fetch(`${apiServer}/files/${folderId}`, {
+      let filesUrl = `${apiServer}/files/${folderId}`;
+      if (searchQuery) {
+        filesUrl += `?q=${searchQuery}`;
+      }
+      const filesResponse = await fetch(filesUrl, {
         method: 'get',
         credentials: 'include',
       });
@@ -84,7 +89,7 @@ const Files: AuthenticatedPage = ({ user }) => {
     };
 
     fetchFiles().catch(console.error);
-  }, [folderId]);
+  }, [folderId, searchQuery]);
 
   const onUploadProgress = useCallback((e: ProgressEvent) => {
     const percentage = (100 * e.loaded) / e.total;
@@ -172,6 +177,9 @@ const Files: AuthenticatedPage = ({ user }) => {
         setFolders={(folder: any) => {
           setFolders((prev) => [...prev, folder]);
         }}
+        onSearchQueryChanged={(query) => {
+          console.log(`Should search for ${query} in folder ${folderId}`);
+        }}
       >
         <UploadModal open={isDragActive} numberFiles={numberDraggedFiles} />
         <UploadStatusDialog status={uploadStatus} setStatus={setUploadStatus} />
@@ -232,13 +240,20 @@ const Files: AuthenticatedPage = ({ user }) => {
           {folderFiles.length == 0 && folders.length == 0 && (
             <>
               <Typography paragraph>
-                Oops... it seems there are no files here :(
+                {searchQuery
+                  ? 'Oops... it seems your search returned no files :('
+                  : 'Oops... it seems there are no files here :('}
               </Typography>
               <input {...getInputProps()} />
-              <Typography paragraph>Drop a file here to upload it!</Typography>
+              {!searchQuery && (
+                <Typography paragraph>
+                  Drop a file here to upload it!
+                </Typography>
+              )}
             </>
           )}
           {folders.length > 0 &&
+            !searchQuery &&
             folders.map((folder) => (
               <SingleFolder
                 key={`folder-${folder.id}`}
@@ -253,18 +268,31 @@ const Files: AuthenticatedPage = ({ user }) => {
               />
             ))}
           {folderFiles.length > 0 &&
+            !searchQuery &&
             folderFiles.map((file) => (
               <SingleFile
                 key={`file-${file.id}`}
-                fileId={file.id}
-                folderId={file.folderId}
                 fileName={file.fileName}
                 originalName={file.originalName}
-                accessByLink={file.accessByLink}
-                users={file.users}
-                ownerId={file.file_access.ownerId}
-                currentUser={user}
+                shareProps={{
+                  fileId: file.id,
+                  folderId: file.folderId,
+                  accessByLink: file.accessByLink,
+                  users: file.users,
+                  ownerId: file.file_access.ownerId,
+                  currentUser: user,
+                }}
                 thumbnail={thumbnailFromFileInfo(file)}
+              />
+            ))}
+          {folderFiles.length > 0 &&
+            searchQuery &&
+            folderFiles.map((page) => (
+              <SingleFile
+                key={`${page.file.id}_p${page.number}`}
+                fileName={page.file.fileName}
+                originalName={page.file.originalName}
+                thumbnail={page.thumbnailPath}
               />
             ))}
         </Box>

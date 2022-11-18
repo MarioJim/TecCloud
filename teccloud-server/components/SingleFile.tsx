@@ -5,34 +5,34 @@ import IconButton from '@mui/material/IconButton';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import CardMedia from '@mui/material/CardMedia';
+import Divider from '@mui/material/Divider';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import InsertDriveFileTwoToneIcon from '@mui/icons-material/InsertDriveFileTwoTone';
 import FileModal from './FileModal';
 import ShareDialog from './ShareDialog';
 import { apiServer } from '../config';
 
-interface SingleFileProps {
+interface ShareProperties {
   fileId: number;
   folderId: number;
-  fileName: string;
-  originalName: string;
   accessByLink: 'private' | 'public';
   users: User[];
   ownerId: number;
   currentUser: User;
+}
+
+interface SingleFileProps {
+  fileName: string;
+  originalName: string;
   thumbnail?: string;
+  shareProps?: ShareProperties;
 }
 
 const SingleFile = ({
-  fileId,
-  folderId,
   fileName,
   originalName,
-  accessByLink,
-  users,
-  ownerId,
-  currentUser,
   thumbnail,
+  shareProps,
 }: SingleFileProps) => {
   const [currentName, setCurrentName] = useState<string>(originalName);
 
@@ -67,6 +67,7 @@ const SingleFile = ({
         <InsertDriveFileTwoToneIcon fontSize='inherit' color='primary' />
       </Box>
     )}
+    <Divider />
     <Box sx={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
       <Typography noWrap sx={{ flex: 1, marginLeft: '8px' }}>
         {currentName}
@@ -79,19 +80,21 @@ const SingleFile = ({
         >
           <DownloadForOfflineIcon fontSize='inherit' />
         </IconButton>
-        <ShareDialog
-          fileId={fileId}
-          folderId={folderId}
-          fileName={fileName}
-          originalName={originalName}
-          accessByLink={accessByLink}
-          users={users}
-          ownerId={ownerId}
-          currentUser={currentUser}
-        />
-        {ownerId === currentUser.id && (
+        {shareProps && (
+          <ShareDialog
+            fileId={shareProps.fileId}
+            folderId={shareProps.folderId}
+            fileName={fileName}
+            originalName={originalName}
+            accessByLink={shareProps.accessByLink}
+            users={shareProps.users}
+            ownerId={shareProps.ownerId}
+            currentUser={shareProps.currentUser}
+          />
+        )}
+        {shareProps && shareProps.ownerId === shareProps.currentUser.id && (
             <FileModal
-              folderId={folderId}
+              folderId={shareProps.folderId}
               fileName={fileName}
               originalName={currentName}
               setCurrentName={setCurrentName}

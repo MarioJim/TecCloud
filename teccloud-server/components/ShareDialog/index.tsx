@@ -8,14 +8,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { apiServer } from '../../config';
 import ShareWithBar from './ShareWithBar';
 import UserAccessList from './UserAccessList';
 import GeneralAccessSelect from './GeneralAccessSelect';
 
 interface ShareDialogProps {
-  fileId: number;
-  folderId: number;
   fileName: string;
   originalName: string;
   accessByLink: 'private' | 'public';
@@ -25,8 +22,6 @@ interface ShareDialogProps {
 }
 
 const ShareDialog = ({
-  fileId,
-  folderId,
   fileName,
   originalName,
   accessByLink,
