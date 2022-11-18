@@ -17,7 +17,6 @@ import UploadStatusDialog, {
 import SingleFile from '../../components/SingleFile';
 import SingleFolder from '../../components/SingleFolder';
 import ReplaceFileModal from '../../components/ReplaceFileModal';
-import Stack from '@mui/material/Stack';
 import { apiServer } from '../../config';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
