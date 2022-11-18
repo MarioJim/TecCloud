@@ -14,7 +14,6 @@ import SidebarUpload from './SidebarUpload';
 interface SidebarProps {
   folderId?: number;
   folderFiles?: any[];
-  folders?: any[];
   setFolderFiles?: (files: any[]) => void;
   setReplaceFiles?: (files: any[]) => void;
   setFolders?: (folder: any) => void;
@@ -23,7 +22,6 @@ interface SidebarProps {
 const Sidebar = ({
   folderId,
   folderFiles,
-  folders,
   setFolderFiles,
   setReplaceFiles,
   setFolders,

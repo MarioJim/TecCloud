@@ -11,7 +11,6 @@ interface ScaffoldProps {
   user: User;
   folderId?: number;
   folderFiles?: any[];
-  folders?: any[];
   setFolderFiles?: (files: any[]) => void;
   setReplaceFiles?: (files: any[]) => void;
   setFolders?: (folder: any) => void;
@@ -23,13 +22,12 @@ const Scaffold = ({
   user,
   folderId,
   folderFiles,
-  folders,
   setFolderFiles,
   setReplaceFiles,
   setFolders,
   onSearchQueryChanged,
 }: ScaffoldProps) => (
-  <Box sx={{ display: 'flex' }}>
+  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
     <AppBar
       position='fixed'
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -39,11 +37,8 @@ const Scaffold = ({
           TecCloud
         </Typography>
 
-        {folderId !== undefined && onSearchQueryChanged !== undefined && (
-          <SearchBar
-            folderId={folderId}
-            onSearchQueryChanged={onSearchQueryChanged}
-          />
+        {onSearchQueryChanged !== undefined && (
+          <SearchBar onSearchQueryChanged={onSearchQueryChanged} />
         )}
 
         <Typography variant='h6' noWrap component='div'>
@@ -54,12 +49,14 @@ const Scaffold = ({
     <Sidebar
       folderId={folderId}
       folderFiles={folderFiles}
-      folders={folders}
       setFolderFiles={setFolderFiles}
       setReplaceFiles={setReplaceFiles}
       setFolders={setFolders}
     />
-    <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
+    <Box
+      component='main'
+      sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column' }}
+    >
       <Toolbar />
       {children}
     </Box>

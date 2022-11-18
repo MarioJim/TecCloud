@@ -19,7 +19,6 @@ app.use(cookieParser());
 
 app.use('/user', UserRoutes);
 app.use('/files', FileRoutes);
-// Folder routes
 app.use('/folder', FolderRoutes);
 
 (async () => {

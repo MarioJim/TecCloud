@@ -77,7 +77,11 @@ const FileModal = ({
 
   return (
     <>
-      <IconButton size='medium' onClick={() => setOpenRename(true)}>
+      <IconButton
+        size='medium'
+        onClick={() => setOpenRename(true)}
+        sx={{ padding: '2px' }}
+      >
         <RenameIcon fontSize='inherit' />
       </IconButton>
       <Dialog
@@ -134,7 +138,11 @@ const FileModal = ({
         </Box>
       </Dialog>
 
-      <IconButton size='medium' onClick={() => setOpenDelete(true)}>
+      <IconButton
+        size='medium'
+        onClick={() => setOpenDelete(true)}
+        sx={{ padding: '2px' }}
+      >
         <DeleteIcon fontSize='inherit' />
       </IconButton>
       <Dialog

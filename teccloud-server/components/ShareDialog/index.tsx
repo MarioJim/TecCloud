@@ -38,7 +38,11 @@ const ShareDialog = ({
 
   return (
     <>
-      <IconButton size='medium' onClick={() => setOpen(true)}>
+      <IconButton
+        size='medium'
+        onClick={() => setOpen(true)}
+        sx={{ padding: '2px' }}
+      >
         <ShareIcon fontSize='inherit' />
       </IconButton>
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth='sm'>

@@ -26,16 +26,18 @@ const StyledTextField = styled((props: TextFieldProps) => (
     },
     '& .MuiInputBase-input': {
       padding: '10px 14px',
+      '::placeholder': {
+        color: 'white',
+      },
     },
   },
 }));
 
 interface SearchBarProps {
-  folderId: number;
   onSearchQueryChanged: (query: string) => void;
 }
 
-const SearchBar = ({ folderId, onSearchQueryChanged }: SearchBarProps) => {
+const SearchBar = ({ onSearchQueryChanged }: SearchBarProps) => {
   const [value, setValue] = useState('');
 
   return (
@@ -52,7 +54,10 @@ const SearchBar = ({ folderId, onSearchQueryChanged }: SearchBarProps) => {
         endAdornment: (
           <IconButton
             sx={{ visibility: value ? 'visible' : 'hidden' }}
-            onClick={() => setValue('')}
+            onClick={() => {
+              setValue('');
+              onSearchQueryChanged('');
+            }}
           >
             <ClearIcon />
           </IconButton>

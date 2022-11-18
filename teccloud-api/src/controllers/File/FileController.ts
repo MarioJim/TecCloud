@@ -79,37 +79,38 @@ class FileController {
           console.error(error);
         }
 
-        files = files.filter((file) => !duplicateNames.has(file.originalname));
-        Promise.all(
-          files.map(async (file) => {
-            const fileInDB = await File.create({
-              fileName: file.filename,
-              originalName: iso88591_to_utf8(file.originalname),
-              folderId: folderId,
-              size: file.size,
-              fileType: file.mimetype,
-            });
-            (await channel).queueFile(fileInDB);
-            return fileInDB;
-          }),
-        )
-          .then(async (savedFiles) => {
-            await user.addFiles(savedFiles, {
-              through: { ownerId: userId },
-            });
-            savedFiles = await user.getFiles({ include: [{ model: User }] });
-            res.status(201).json({
-              success: true,
-              message: 'Files uploaded successfully',
-              files: savedFiles,
-            });
-          })
-          .catch((e) => {
-            res.status(500).json({
-              success: false,
-              message: `Error uploading files:\n${e}`,
-            });
+        try {
+          let savedFiles = await Promise.all(
+            files
+              .filter((file) => !duplicateNames.has(file.originalname))
+              .map(async (file) => {
+                const fileInDB = await File.create({
+                  fileName: file.filename,
+                  originalName: iso88591_to_utf8(file.originalname),
+                  folderId: folderId,
+                  size: file.size,
+                  fileType: file.mimetype,
+                });
+                (await channel).queueFile(fileInDB);
+                return fileInDB;
+              }),
+          );
+
+          await user.addFiles(savedFiles, {
+            through: { ownerId: userId },
           });
+
+          res.status(201).json({
+            success: true,
+            message: 'Files uploaded successfully',
+            files: await user.getFiles({ include: [{ model: User }] }),
+          });
+        } catch (e) {
+          res.status(500).json({
+            success: false,
+            message: `Error uploading files:\n${e}`,
+          });
+        }
       });
     };
   }

@@ -1,9 +1,8 @@
 import type { GetServerSideUser, AuthenticatedPage, User } from '../../types';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import axios from 'axios';
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
@@ -18,6 +17,7 @@ import SingleFile from '../../components/SingleFile';
 import SingleFolder from '../../components/SingleFolder';
 import ReplaceFileModal from '../../components/ReplaceFileModal';
 import { apiServer } from '../../config';
+import uploadCallback from '../../lib/uploadCallback';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
   const res = await fetch(`${apiServer}/user/auth/${ctx.params!.folderId}`, {
@@ -91,63 +91,16 @@ const Files: AuthenticatedPage = ({ user }) => {
     fetchFiles().catch(console.error);
   }, [folderId, searchQuery]);
 
-  const onUploadProgress = useCallback((e: ProgressEvent) => {
-    const percentage = (100 * e.loaded) / e.total;
-    if (percentage < 100) {
-      setUploadStatus({ status: 'progress', percentage });
-    } else {
-      setUploadStatus({ status: 'success' });
-    }
-  }, []);
-
   const onDrop = useCallback(
-    async (acceptedFiles: File[]) => {
-      const formData = new FormData();
-      formData.set('folderId', `${folderId}`);
-
-      const currentFiles = new Map<string, string>(
-        folderFiles.map((file) => [file.originalName, file.fileName]),
-      );
-
-      const duplicates = acceptedFiles
-        .map((file) => {
-          if (currentFiles.has(file.name)) {
-            return { prevFileName: currentFiles.get(file.name), replace: file };
-          }
-        })
-        .filter((notUndefined) => notUndefined !== undefined);
-      acceptedFiles.forEach((file) => formData.append('files', file));
-
-      try {
-        const response = await axios.post(
-          `${apiServer}/files/upload`,
-          formData,
-          {
-            withCredentials: true,
-            onUploadProgress,
-          },
-        );
-
-        setReplaceFiles([...duplicates]);
-        setFolderFiles([...folderFiles, ...response.data.files]);
-      } catch (e: any) {
-        if (e.response.status === 413) {
-          setUploadStatus({
-            status: 'error',
-            message:
-              'Files were too large, try uploading files smaller than 10MB',
-          });
-        } else {
-          setUploadStatus({
-            status: 'error',
-            message:
-              'The server ran into an error while receiving your files, try again!',
-          });
-        }
-        console.error('Error uploading files:', e);
-      }
-    },
-    [onUploadProgress, folderId, folderFiles],
+    async (files: any[]) =>
+      uploadCallback(
+        folderId,
+        folderFiles,
+        setFolderFiles,
+        setReplaceFiles,
+        setUploadStatus,
+      )(files),
+    [folderId, folderFiles, setFolderFiles, setReplaceFiles],
   );
 
   const { getInputProps, getRootProps, isDragActive } = useDropzone({
@@ -167,9 +120,8 @@ const Files: AuthenticatedPage = ({ user }) => {
         user={user}
         folderId={folderId}
         folderFiles={folderFiles}
-        folders={folders}
         setFolderFiles={(files: any[]) => {
-          setFolderFiles((prev) => [...prev, ...files]);
+          setFolderFiles([...files]);
         }}
         setReplaceFiles={(files: any[]) => {
           setReplaceFiles([...files]);
@@ -203,44 +155,36 @@ const Files: AuthenticatedPage = ({ user }) => {
           />
         ))}
         {parentId && (
-          <Box
-            sx={{
-              height: '54px',
-              alignItems: 'center',
-              margin: '5px',
-            }}
+          <Stack
+            direction='row'
+            justifyContent='flex-start'
+            alignItems='center'
+            spacing={1}
           >
-            <Stack
-              direction='row'
-              justifyContent='flex-start'
-              alignItems='center'
-              spacing={1}
-            >
-              <IconButton size='large' href={`/files/${parentId}`}>
-                <ArrowBackIcon fontSize='inherit' />
-              </IconButton>
-              <Typography noWrap sx={{ width: 0.6 }}>
-                Go back
-              </Typography>
-            </Stack>
-          </Box>
+            <IconButton size='large' href={`/files/${parentId}`}>
+              <ArrowBackIcon fontSize='inherit' />
+            </IconButton>
+            <Typography noWrap sx={{ width: 0.6 }}>
+              Go back
+            </Typography>
+          </Stack>
         )}
         <Box
           sx={{
-            maxWidth: 'calc(100vw - 300px)',
             display: 'flex',
             flexWrap: 'wrap',
           }}
-          {...getRootProps()}
         >
           {folderFiles.length === 0 && folders.length === 0 && !searchQuery && (
             <>
+              <Typography paragraph flex='0 0 100%'>
+                {' '}
+              </Typography>
               <Typography paragraph flex='0 0 100%'>
                 Oops... it seems there are no files here :(
               </Typography>
               <br />
               <Typography paragraph>Drop a file here to upload it!</Typography>
-              <input {...getInputProps()} />
             </>
           )}
           {folderFiles.length === 0 && folders.length === 0 && searchQuery && (
@@ -291,6 +235,9 @@ const Files: AuthenticatedPage = ({ user }) => {
                 thumbnail={page.thumbnailPath}
               />
             ))}
+        </Box>
+        <Box sx={{ width: '100%', flexGrow: 1 }} {...getRootProps()}>
+          <input {...getInputProps()} />
         </Box>
       </Scaffold>
     </Fragment>

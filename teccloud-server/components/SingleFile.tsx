@@ -77,6 +77,7 @@ const SingleFile = ({
             size='medium'
             target='_blank'
             href={`${apiServer}/files/download/${fileName}`}
+            sx={{ padding: '2px' }}
           >
             <DownloadForOfflineIcon fontSize='inherit' />
           </IconButton>
