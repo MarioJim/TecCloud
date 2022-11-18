@@ -88,7 +88,6 @@ class UserController {
 
   public isLoggedIn(): RequestHandler {
     return async (req: Request, res: Response) => {
-      console.log('dafuk are u doing here');
       const user = await User.findByPk(req.userId);
       if (user !== null) {
         res.status(201).json({
