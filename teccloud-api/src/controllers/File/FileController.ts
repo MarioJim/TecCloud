@@ -25,7 +25,7 @@ class FileController {
           if (error.code === 'LIMIT_FILE_SIZE') {
             return res.status(413).json({
               success: false,
-              message: `File too large`,
+              message: 'File too large',
             });
           } else {
             return res.status(500).json({
@@ -224,11 +224,12 @@ class FileController {
         return res.sendStatus(404);
       }
 
+      const folders = await Folder.findAll({ where: { parentId: folderId } });
+
       let files = await user.getFiles({
         where: { folderId },
         include: [{ model: User }],
       });
-      const folders = await Folder.findAll({ where: { parentId: folderId } });
       if (!(await folder.isOwnedBy(user))) {
         const filePermissions = await Promise.all(
           files.map((file) => file.viewableBy(user)),
@@ -255,6 +256,56 @@ class FileController {
       });
 
       res.json(files);
+    };
+  }
+
+  public rename(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { folderId, fileName, originalName, newFileName } = req.body;
+      const { userId } = req;
+      if (!folderId || !fileName || !originalName || !newFileName || !userId) {
+        return res.sendStatus(401);
+      }
+
+      const re = /(?:\.([^.]+))?$/;
+      const ext = re.exec(originalName)![1];
+      const updatedFileName = [newFileName, ext].join('.');
+
+      const file = await File.findOne({ where: { fileName } });
+      if (!file) {
+        return res.sendStatus(404).json({
+          success: false,
+          message: 'File not found.',
+        });
+      }
+
+      const files = await File.findAll({
+        where: { folderId: folderId, originalName: updatedFileName },
+      });
+      if (files.length !== 0) {
+        return res.status(401).json({
+          success: false,
+          message: 'File with same name already exists.',
+        });
+      }
+
+      const user = await User.findByPk(userId);
+      if (!(user && (await file.ownedBy(user)))) {
+        return res.sendStatus(403);
+      }
+
+      try {
+        await file.update({ originalName: updatedFileName });
+
+        res.status(200).send({
+          message: 'File updated.',
+          updatedFileName: updatedFileName,
+        });
+      } catch (err) {
+        res.status(500).send({
+          message: 'Could not update file.\n' + err,
+        });
+      }
     };
   }
 

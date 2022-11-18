@@ -12,6 +12,7 @@ import TextField from '@mui/material/TextField';
 import Collapse from '@mui/material/Collapse';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
+import { apiServer } from '../../config';
 
 interface SidebarAddFolderProps {
   folderId: number;
@@ -23,7 +24,6 @@ const SidebarAddFolder = ({ folderId, setFolders }: SidebarAddFolderProps) => {
   const [error, setError] = useState<boolean>(false);
   const handleClose = () => setOpen(false);
 
-  //const createFolder: (e: React.FormEvent) => void = async (e) => {
   const createFolder = async (e: React.FormEvent): Promise<any> => {
     e.preventDefault();
     const target = e.target as typeof e.target & {
@@ -32,7 +32,7 @@ const SidebarAddFolder = ({ folderId, setFolders }: SidebarAddFolderProps) => {
 
     try {
       const response = await axios.post(
-        `http://localhost:3001/folder/${folderId}`,
+        `${apiServer}/folder/${folderId}`,
         { folderName: target.folderName.value },
         {
           withCredentials: true,
