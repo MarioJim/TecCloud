@@ -20,7 +20,7 @@ import ReplaceFileModal from '../../components/ReplaceFileModal';
 import { apiServer } from '../../config';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
-  const res = await fetch(`${apiServer}/user/auth`, {
+  const res = await fetch(`${apiServer}/user/auth/${ctx.params!.folderId}`, {
     credentials: 'include',
     headers: ctx.req.headers as HeadersInit,
   });
@@ -207,10 +207,7 @@ const Files: AuthenticatedPage = ({ user }) => {
                 alignItems='center'
                 spacing={1}
               >
-                <IconButton
-                  size='large'
-                  href={`http://localhost:3000/files/${parentId}`}
-                >
+                <IconButton size='large' href={`/files/${parentId}`}>
                   <ArrowBackIcon fontSize='inherit' />
                 </IconButton>
                 <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>

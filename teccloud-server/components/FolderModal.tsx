@@ -16,22 +16,28 @@ interface FolderModalProps {
   folderId: number;
   folderName: string;
   folders: any[];
+  openRename: boolean;
+  openDelete: boolean;
   setCurrentName: (folderName: any) => void;
   setFolders: (folder: any) => void;
+  setOpenRename: (open: boolean) => void;
+  setOpenDelete: (open: boolean) => void;
 }
 
 const FolderModal = ({
   folderId,
   folderName,
   folders,
+  openRename,
+  openDelete,
   setCurrentName,
   setFolders,
+  setOpenRename,
+  setOpenDelete,
 }: FolderModalProps) => {
-  const [openRename, setOpenRename] = useState<boolean>(false);
-  const handleCloseRename = () => setOpenRename(false);
+  const handleCloseRename = () => setTimeout(() => setOpenRename(false), 200);
+  const handleCloseDelete = () => setTimeout(() => setOpenDelete(false), 200);
   const [error, setError] = useState<boolean>(false);
-  const [openDelete, setOpenDelete] = useState<boolean>(false);
-  const handleCloseDelete = () => setOpenDelete(false);
 
   const renameFolder = async (e: React.FormEvent): Promise<any> => {
     e.preventDefault();
@@ -90,7 +96,7 @@ const FolderModal = ({
         Rename
       </Button>
       <Modal open={openRename} onClose={handleCloseRename}>
-        <Fade in={openRename}>
+        <Fade in={openRename} timeout={200}>
           <Box
             component='form'
             onSubmit={renameFolder}

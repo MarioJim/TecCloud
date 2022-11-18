@@ -43,7 +43,7 @@ class UserController {
       res.cookie('authcookie', token);
       res.status(201).json({
         success: true,
-        message: 'User created successfully',
+        message: 'User created successfully.',
         user,
       });
     };
@@ -68,7 +68,7 @@ class UserController {
       res.cookie('authcookie', token);
       res.status(201).json({
         success: true,
-        message: 'Login successful',
+        message: 'Login successful.',
         user,
       });
     };
@@ -81,7 +81,7 @@ class UserController {
       res.clearCookie('authcookie');
       res.status(200).json({
         success: true,
-        message: 'Logout successful',
+        message: 'Logout successful.',
       });
     };
   }
@@ -92,13 +92,50 @@ class UserController {
       if (user !== null) {
         res.status(201).json({
           success: true,
-          message: 'Active session',
+          message: 'Active session.',
           user,
         });
       } else {
         // Only happens when clearing the DB
         res.sendStatus(401);
       }
+    };
+  }
+
+  public isLoggedInAndOwnsFolder(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      let folderId = parseInt(req.params.folderId);
+      const user = await User.findByPk(req.userId);
+      if (!user) {
+        res.status(401).json({
+          success: false,
+          message: 'Inactive session.',
+        });
+      }
+
+      if (folderId === 0) {
+        folderId = user!.folderId;
+      }
+      const folder = await Folder.findOne({ where: { id: folderId } });
+      if (!folder) {
+        return res.status(404).json({
+          success: false,
+          message: 'Folder not found.',
+        });
+      }
+
+      if (!(await folder.isOwnedBy(user!))) {
+        return res.status(403).json({
+          success: false,
+          message: 'Folder not owned by user.',
+        });
+      }
+
+      return res.status(201).json({
+        success: true,
+        message: 'Active session.',
+        user,
+      });
     };
   }
 }

@@ -42,6 +42,8 @@ const SingleFolder = ({
 }: SingleFolderProps) => {
   const [currentName, setCurrentName] = useState<any>(folderName);
   const [folderColor, setFolderColor] = useState<any>(blue[50]);
+  const [openRename, setOpenRename] = useState<boolean>(false);
+  const [openDelete, setOpenDelete] = useState<boolean>(false);
 
   const handleClickOutside = () => {
     setFolderColor(blue[50]);
@@ -50,6 +52,9 @@ const SingleFolder = ({
   const ref = useOutsideClick(handleClickOutside);
 
   const handleClick = (e: any) => {
+    if (openRename || openDelete) {
+      return;
+    }
     if (e.detail === 1) {
       setFolderColor(blue[100]);
     }
@@ -78,10 +83,7 @@ const SingleFolder = ({
         alignItems='center'
         spacing={1}
       >
-        <IconButton
-          size='large'
-          href={`http://localhost:3000/files/${folderId}`}
-        >
+        <IconButton size='large' href={`/files/${folderId}`}>
           <FolderIcon fontSize='inherit' />
         </IconButton>
         <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
@@ -97,8 +99,12 @@ const SingleFolder = ({
             folderId={folderId}
             folderName={folderName}
             folders={folders}
+            openRename={openRename}
+            openDelete={openDelete}
             setCurrentName={setCurrentName}
             setFolders={setFolders}
+            setOpenRename={setOpenRename}
+            setOpenDelete={setOpenDelete}
           />
         </Stack>
       </Stack>
