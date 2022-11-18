@@ -83,10 +83,7 @@ const SingleFolder = ({
         alignItems='center'
         spacing={1}
       >
-        <IconButton
-          size='large'
-          href={`http://localhost:3000/files/${folderId}`}
-        >
+        <IconButton size='large' href={`/files/${folderId}`}>
           <FolderIcon fontSize='inherit' />
         </IconButton>
         <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
