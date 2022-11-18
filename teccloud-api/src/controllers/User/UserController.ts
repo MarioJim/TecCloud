@@ -107,7 +107,7 @@ class UserController {
       let folderId = parseInt(req.params.folderId);
       const user = await User.findByPk(req.userId);
       if (!user) {
-        res.status(401).json({
+        return res.status(401).json({
           success: false,
           message: 'Inactive session.',
         });

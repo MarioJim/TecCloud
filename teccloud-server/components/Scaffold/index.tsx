@@ -3,17 +3,18 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Sidebar from './Sidebar';
+import SearchBar from './SearchBar';
 import { User } from '../../types';
 
 interface ScaffoldProps {
+  children: React.ReactNode;
   user: User;
   folderId?: number;
-  children: React.ReactNode;
   folderFiles?: any[];
-  folders?: any[];
   setFolderFiles?: (files: any[]) => void;
   setReplaceFiles?: (files: any[]) => void;
   setFolders?: (folder: any) => void;
+  onSearchQueryChanged?: (query: string) => void;
 }
 
 const Scaffold = ({
@@ -21,12 +22,12 @@ const Scaffold = ({
   user,
   folderId,
   folderFiles,
-  folders,
   setFolderFiles,
   setReplaceFiles,
   setFolders,
+  onSearchQueryChanged,
 }: ScaffoldProps) => (
-  <Box sx={{ display: 'flex' }}>
+  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
     <AppBar
       position='fixed'
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -36,6 +37,10 @@ const Scaffold = ({
           TecCloud
         </Typography>
 
+        {onSearchQueryChanged !== undefined && (
+          <SearchBar onSearchQueryChanged={onSearchQueryChanged} />
+        )}
+
         <Typography variant='h6' noWrap component='div'>
           {user.username}
         </Typography>
@@ -44,12 +49,14 @@ const Scaffold = ({
     <Sidebar
       folderId={folderId}
       folderFiles={folderFiles}
-      folders={folders}
       setFolderFiles={setFolderFiles}
       setReplaceFiles={setReplaceFiles}
       setFolders={setFolders}
     />
-    <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
+    <Box
+      component='main'
+      sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column' }}
+    >
       <Toolbar />
       {children}
     </Box>

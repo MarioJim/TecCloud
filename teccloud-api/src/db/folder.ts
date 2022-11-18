@@ -5,7 +5,7 @@ import {
   InferAttributes,
   InferCreationAttributes,
 } from 'sequelize';
-import { sequelize, User } from './index';
+import { sequelize, User, File } from './index';
 
 export class Folder extends Model<
   InferAttributes<Folder>,
@@ -26,6 +26,27 @@ export class Folder extends Model<
     }
     const parentFolder = await Folder.findByPk(this.parentId);
     return parentFolder?.isOwnedBy(user) || false;
+  }
+
+  async deleteOnServer(): Promise<void> {
+    let files: any[] = [];
+    try {
+      files = await File.findAll({ where: { folderId: this.id } });
+    } catch (error) {
+      console.error(error);
+    }
+
+    let folders: any[] = [];
+    try {
+      folders = await Folder.findAll({ where: { parentId: this.id } });
+    } catch (error) {
+      console.error(error);
+    }
+
+    await Promise.allSettled([
+      ...files.map((file) => file.deleteOnServer()),
+      ...folders.map((folder) => folder.deleteOnServer()),
+    ]);
   }
 }
 

@@ -7,7 +7,9 @@ import {
   BelongsToManyAddAssociationMixin,
   BelongsToManyRemoveAssociationMixin,
 } from 'sequelize';
-import { sequelize, Folder, User, FileAccess } from './index';
+import fs from 'fs/promises';
+import { get_file_server_path } from '../utils/files';
+import { sequelize, Folder, User, FileAccess, Page } from './index';
 
 export class File extends Model<
   InferAttributes<File>,
@@ -44,6 +46,21 @@ export class File extends Model<
       where: { fileId: this.id, userId: user.id },
     });
     return access !== null;
+  }
+
+  async deleteOnServer(): Promise<void> {
+    const path = get_file_server_path(this.fileName);
+    let pages: any[] = [];
+    try {
+      pages = await Page.findAll({ where: { fileId: this.id } });
+    } catch (error) {
+      console.error(error);
+    }
+
+    await Promise.allSettled([
+      fs.unlink(path),
+      ...pages.map((page) => page.deleteOnServer()),
+    ]);
   }
 }
 

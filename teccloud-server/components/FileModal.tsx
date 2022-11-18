@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
-import Fade from '@mui/material/Fade';
-import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import { apiServer } from '../config';
 import TextField from '@mui/material/TextField';
 import Collapse from '@mui/material/Collapse';
+import Dialog from '@mui/material/Dialog';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import RenameIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
+import { apiServer } from '../config';
 
 interface FileModalProps {
   folderId: number;
@@ -75,127 +77,118 @@ const FileModal = ({
 
   return (
     <>
-      <Button
-        variant='contained'
-        color='warning'
+      <IconButton
+        size='medium'
         onClick={() => setOpenRename(true)}
+        sx={{ padding: '2px' }}
       >
-        Rename
-      </Button>
-      <Modal open={openRename} onClose={handleCloseRename}>
-        <Fade in={openRename}>
-          <Box
-            component='form'
-            onSubmit={renameFile}
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 400,
-              bgcolor: 'background.paper',
-              border: '5px solid blue',
-              boxShadow: 24,
-              p: 4,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <Typography variant='h5' textAlign='center' fontWeight='bold'>
-              What will be the new name?
-            </Typography>
-            <TextField
-              required
-              fullWidth
-              name='newFileName'
-              id='newFileName'
-              sx={{ m: 2 }}
-            />
-            <Box sx={{ width: '100%' }}>
-              <Collapse in={error}>
-                <Alert severity='error' sx={{ mb: 2 }}>
-                  <AlertTitle>Error</AlertTitle>
-                  File name already exists in this folder!
-                </Alert>
-              </Collapse>
-            </Box>
-            <Stack
-              direction='row'
-              justifyContent='flex-start'
-              alignItems='center'
-              spacing={1}
-            >
-              <Button
-                variant='contained'
-                color='primary'
-                onClick={handleCloseRename}
-              >
-                Go back
-              </Button>
-              <Button variant='contained' color='warning' type='submit'>
-                Rename
-              </Button>
-            </Stack>
+        <RenameIcon fontSize='inherit' />
+      </IconButton>
+      <Dialog
+        open={openRename}
+        onClose={handleCloseRename}
+        fullWidth
+        maxWidth='sm'
+      >
+        <Box
+          component='form'
+          onSubmit={renameFile}
+          sx={{
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Typography variant='h5' textAlign='center' fontWeight='bold'>
+            What will be the new name?
+          </Typography>
+          <TextField
+            required
+            fullWidth
+            name='newFileName'
+            id='newFileName'
+            sx={{ m: 2 }}
+          />
+          <Box sx={{ width: '100%' }}>
+            <Collapse in={error}>
+              <Alert severity='error' sx={{ mb: 2 }}>
+                <AlertTitle>Error</AlertTitle>
+                File name already exists in this folder!
+              </Alert>
+            </Collapse>
           </Box>
-        </Fade>
-      </Modal>
-      <Button
-        variant='contained'
-        color='error'
+          <Stack
+            direction='row'
+            justifyContent='flex-start'
+            alignItems='center'
+            spacing={1}
+          >
+            <Button
+              variant='contained'
+              color='primary'
+              onClick={handleCloseRename}
+            >
+              Go back
+            </Button>
+            <Button variant='contained' color='warning' type='submit'>
+              Rename
+            </Button>
+          </Stack>
+        </Box>
+      </Dialog>
+
+      <IconButton
+        size='medium'
         onClick={() => setOpenDelete(true)}
+        sx={{ padding: '2px' }}
       >
-        Delete
-      </Button>
-      <Modal open={openDelete} onClose={handleCloseDelete}>
-        <Fade in={openDelete}>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 400,
-              bgcolor: 'background.paper',
-              border: '5px solid red',
-              boxShadow: 24,
-              p: 4,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
+        <DeleteIcon fontSize='inherit' />
+      </IconButton>
+      <Dialog
+        open={openDelete}
+        onClose={handleCloseDelete}
+        fullWidth
+        maxWidth='sm'
+      >
+        <Box
+          sx={{
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Typography variant='h5' textAlign='center' fontWeight='bold'>
+            Are you sure you want to permanently delete this file?
+          </Typography>
+          <Typography
+            variant='h5'
+            textAlign='center'
+            fontStyle='italic'
+            sx={{ my: 4 }}
           >
-            <Typography variant='h5' textAlign='center' fontWeight='bold'>
-              Are you sure you want to permanently delete this file?
-            </Typography>
-            <Typography
-              variant='h5'
-              textAlign='center'
-              fontStyle='italic'
-              sx={{ my: 4 }}
+            {originalName}
+          </Typography>
+          <Stack
+            direction='row'
+            justifyContent='flex-start'
+            alignItems='center'
+            spacing={1}
+          >
+            <Button
+              variant='contained'
+              color='primary'
+              onClick={handleCloseDelete}
             >
-              {originalName}
-            </Typography>
-            <Stack
-              direction='row'
-              justifyContent='flex-start'
-              alignItems='center'
-              spacing={1}
-            >
-              <Button
-                variant='contained'
-                color='primary'
-                onClick={handleCloseDelete}
-              >
-                No, go back
-              </Button>
-              <Button variant='contained' color='error' onClick={deleteFile}>
-                Yes, delete now
-              </Button>
-            </Stack>
-          </Box>
-        </Fade>
-      </Modal>
+              No, go back
+            </Button>
+            <Button variant='contained' color='error' onClick={deleteFile}>
+              Yes, delete now
+            </Button>
+          </Stack>
+        </Box>
+      </Dialog>
     </>
   );
 };

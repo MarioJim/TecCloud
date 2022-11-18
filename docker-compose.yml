@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  server:
+    build: ./teccloud-server
+    ports:
+      - 3000:3000
+    environment:
+      - API_SERVER_URL=http://api:3001
+    depends_on:
+      - api
+
+  api:
+    build: ./teccloud-api
+    ports:
+      - 3001:3001
+    environment:
+      - POSTGRES_HOST=database
+      - RABBITMQ_HOST=queue
+    env_file:
+      - config/postgres.env
+      - config/rabbitmq.env
+    volumes:
+      - userfiles:/app/userfiles
+    depends_on:
+      - database
+      - queue
+
+  rust-worker:
+    build: ./teccloud-rust-worker
+    environment:
+      - RUST_LOG=debug
+      - POSTGRES_HOST=database
+      - RABBITMQ_HOST=queue
+    env_file:
+      - config/postgres.env
+      - config/rabbitmq.env
+    volumes:
+      - userfiles:/app/userfiles
+    depends_on:
+      - api
+      - database
+      - queue
+
+  database:
+    image: postgres:15
+    ports:
+      - 5432:5432
+    env_file:
+      - config/postgres.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 5050:80
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+
+  queue:
+    image: rabbitmq:3-management
+    ports:
+      - 15672:15672
+      - 5672:5672
+    env_file:
+      - config/rabbitmq.env
+    volumes:
+      - rmqdata:/var/lib/rabbitmq
+
+volumes:
+  userfiles:
+  pgdata:
+  rmqdata:

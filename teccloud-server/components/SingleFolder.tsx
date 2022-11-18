@@ -1,11 +1,11 @@
-import { blue } from '@mui/material/colors';
+import { blue, blueGrey } from '@mui/material/colors';
 import Box from '@mui/material/Box';
 import FolderIcon from '@mui/icons-material/Folder';
-import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useEffect, useRef, useState } from 'react';
 import FolderModal from './FolderModal';
+import Card from '@mui/material/Card';
+import Divider from '@mui/material/Divider';
 
 interface SingleFolderProps {
   folderId: number;
@@ -14,7 +14,7 @@ interface SingleFolderProps {
   setFolders: (folder: any) => void;
 }
 
-const useOutsideClick = (callback: any) => {
+const useOutsideClick = (callback: () => void) => {
   const ref = useRef<any>();
 
   useEffect(() => {
@@ -40,75 +40,59 @@ const SingleFolder = ({
   folders,
   setFolders,
 }: SingleFolderProps) => {
-  const [currentName, setCurrentName] = useState<any>(folderName);
-  const [folderColor, setFolderColor] = useState<any>(blue[50]);
+  const [currentName, setCurrentName] = useState<string>(folderName);
+  const [folderColor, setFolderColor] = useState<string>(blueGrey[50]);
   const [openRename, setOpenRename] = useState<boolean>(false);
   const [openDelete, setOpenDelete] = useState<boolean>(false);
 
-  const handleClickOutside = () => {
-    setFolderColor(blue[50]);
-  };
-
-  const ref = useOutsideClick(handleClickOutside);
-
-  const handleClick = (e: any) => {
-    if (openRename || openDelete) {
-      return;
-    }
-    if (e.detail === 1) {
-      setFolderColor(blue[100]);
-    }
-    if (e.detail > 1) {
-      location.assign(`/files/${folderId}`);
-    }
-  };
+  const ref = useOutsideClick(() => setFolderColor(blueGrey[50]));
 
   return (
-    <Box
+    <Card
       ref={ref}
-      sx={{
-        height: '54px',
-        borderTop: 1,
-        borderBottom: 1,
-        backgroundColor: folderColor,
-        borderColor: 'primary.main',
-        alignItems: 'center',
-        margin: '5px',
+      onClick={(e) => {
+        if (openRename || openDelete) return;
+        if (e.detail === 1) setFolderColor(blue[100]);
+        if (e.detail > 1) location.assign(`/files/${folderId}`);
       }}
-      onClick={handleClick}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        margin: '8px',
+        width: '270px',
+        backgroundColor: folderColor,
+      }}
     >
-      <Stack
-        direction='row'
-        justifyContent='flex-start'
-        alignItems='center'
-        spacing={1}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: 180,
+          fontSize: '72px',
+        }}
       >
-        <IconButton size='large' href={`/files/${folderId}`}>
-          <FolderIcon fontSize='inherit' />
-        </IconButton>
-        <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
+        <FolderIcon fontSize='inherit' color='primary' />
+      </Box>
+      <Divider />
+      <Box sx={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
+        <Typography noWrap sx={{ flex: 1, marginLeft: '8px' }}>
           {currentName}
         </Typography>
-        <Stack
-          direction='row'
-          justifyContent='flex-end'
-          spacing={1}
-          sx={{ width: 0.4, paddingRight: 2 }}
-        >
-          <FolderModal
-            folderId={folderId}
-            folderName={folderName}
-            folders={folders}
-            openRename={openRename}
-            openDelete={openDelete}
-            setCurrentName={setCurrentName}
-            setFolders={setFolders}
-            setOpenRename={setOpenRename}
-            setOpenDelete={setOpenDelete}
-          />
-        </Stack>
-      </Stack>
-    </Box>
+        <FolderModal
+          folderId={folderId}
+          folderName={folderName}
+          folders={folders}
+          openRename={openRename}
+          openDelete={openDelete}
+          setCurrentName={setCurrentName}
+          setFolders={setFolders}
+          setOpenRename={setOpenRename}
+          setOpenDelete={setOpenDelete}
+        />
+      </Box>
+    </Card>
   );
 };
 

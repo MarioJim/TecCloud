@@ -58,14 +58,16 @@ const Shared: AuthenticatedPage = ({ user }) => {
           {sharedFiles.map((file) => (
             <SingleFile
               key={file.id}
-              fileId={file.id}
-              folderId={file.folderId}
               fileName={file.fileName}
               originalName={file.originalName}
-              accessByLink={file.accessByLink}
-              users={file.users}
-              ownerId={file.file_access.ownerId}
-              currentUser={user}
+              shareProps={{
+                fileId: file.id,
+                folderId: file.folderId,
+                accessByLink: file.accessByLink,
+                users: file.users,
+                ownerId: file.file_access.ownerId,
+                currentUser: user,
+              }}
             />
           ))}
         </Box>
