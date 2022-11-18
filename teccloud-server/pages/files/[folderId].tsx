@@ -1,9 +1,12 @@
 import type { GetServerSideUser, AuthenticatedPage, User } from '../../types';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import axios from 'axios';
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useDropzone } from 'react-dropzone';
 import Scaffold from '../../components/Scaffold';
@@ -12,6 +15,7 @@ import UploadStatusDialog, {
   UploadStatus,
 } from '../../components/UploadStatusDialog';
 import SingleFile from '../../components/SingleFile';
+import SingleFolder from '../../components/SingleFolder';
 import ReplaceFileModal from '../../components/ReplaceFileModal';
 import { apiServer } from '../../config';
 
@@ -49,6 +53,8 @@ const Files: AuthenticatedPage = ({ user }) => {
   const [numberDraggedFiles, setNumberDraggedFiles] = useState<number>(0);
   const [folderFiles, setFolderFiles] = useState<any[]>([]);
   const [replaceFiles, setReplaceFiles] = useState<any[]>([]);
+  const [folders, setFolders] = useState<any[]>([]);
+  const [parentId, setParentId] = useState<any>();
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     status: 'initial',
   });
@@ -60,7 +66,9 @@ const Files: AuthenticatedPage = ({ user }) => {
         credentials: 'include',
       });
       const filesJson = await filesResponse.json();
-      setFolderFiles(filesJson);
+      setFolderFiles(filesJson.files);
+      setFolders(filesJson.folders);
+      setParentId(filesJson.parentId);
     };
 
     fetchFiles().catch(console.error);
@@ -142,11 +150,15 @@ const Files: AuthenticatedPage = ({ user }) => {
         user={user}
         folderId={folderId}
         folderFiles={folderFiles}
+        folders={folders}
         setFolderFiles={(files: any[]) => {
           setFolderFiles((prev) => [...prev, ...files]);
         }}
         setReplaceFiles={(files: any[]) => {
           setReplaceFiles([...files]);
+        }}
+        setFolders={(folder: any) => {
+          setFolders((prev) => [...prev, folder]);
         }}
       >
         <UploadModal open={isDragActive} numberFiles={numberDraggedFiles} />
@@ -181,7 +193,33 @@ const Files: AuthenticatedPage = ({ user }) => {
           ) : (
             <></>
           )}
-          {folderFiles.length == 0 ? (
+          {parentId && (
+            <Box
+              sx={{
+                height: '54px',
+                alignItems: 'center',
+                margin: '5px',
+              }}
+            >
+              <Stack
+                direction='row'
+                justifyContent='flex-start'
+                alignItems='center'
+                spacing={1}
+              >
+                <IconButton
+                  size='large'
+                  href={`http://localhost:3000/files/${parentId}`}
+                >
+                  <ArrowBackIcon fontSize='inherit' />
+                </IconButton>
+                <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
+                  Go back
+                </Typography>
+              </Stack>
+            </Box>
+          )}
+          {folderFiles.length == 0 && folders.length == 0 && (
             <>
               <Typography paragraph>
                 Oops... it seems there are no files here :(
@@ -189,10 +227,25 @@ const Files: AuthenticatedPage = ({ user }) => {
               <input {...getInputProps()} />
               <Typography paragraph>Drop a file here to upload it!</Typography>
             </>
-          ) : (
+          )}
+          {folders.length > 0 &&
+            folders.map((folder) => (
+              <SingleFolder
+                key={`folder-${folder.id}`}
+                folderId={folder.id}
+                folderName={folder.name}
+                folders={folders}
+                setFolders={(folderToRemove: any) => {
+                  setFolders((prev) =>
+                    prev.filter((folder) => folder.id !== folderToRemove),
+                  );
+                }}
+              />
+            ))}
+          {folderFiles.length > 0 &&
             folderFiles.map((file) => (
               <SingleFile
-                key={file.id}
+                key={`file-${file.id}`}
                 fileId={file.id}
                 folderId={file.folderId}
                 fileName={file.fileName}
@@ -202,8 +255,7 @@ const Files: AuthenticatedPage = ({ user }) => {
                 ownerId={file.file_access.ownerId}
                 currentUser={user}
               />
-            ))
-          )}
+            ))}
         </Box>
       </Scaffold>
     </Fragment>

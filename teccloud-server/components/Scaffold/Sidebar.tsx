@@ -6,6 +6,7 @@ import List from '@mui/material/List';
 import FolderIcon from '@mui/icons-material/Folder';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
+import SidebarAddFolder from './SidebarAddFolder';
 import SidebarItem from './SidebarItem';
 import SidebarLogout from './SidebarLogout';
 import SidebarUpload from './SidebarUpload';
@@ -13,15 +14,19 @@ import SidebarUpload from './SidebarUpload';
 interface SidebarProps {
   folderId?: number;
   folderFiles?: any[];
+  folders?: any[];
   setFolderFiles?: (files: any[]) => void;
   setReplaceFiles?: (files: any[]) => void;
+  setFolders?: (folder: any) => void;
 }
 
 const Sidebar = ({
   folderId,
   folderFiles,
+  folders,
   setFolderFiles,
   setReplaceFiles,
+  setFolders,
 }: SidebarProps) => (
   <Drawer
     variant='permanent'
@@ -39,7 +44,8 @@ const Sidebar = ({
       {folderId !== undefined &&
         folderFiles !== undefined &&
         setFolderFiles !== undefined &&
-        setReplaceFiles !== undefined && (
+        setReplaceFiles !== undefined &&
+        setFolders !== undefined && (
           <List>
             <SidebarUpload
               folderId={folderId}
@@ -47,6 +53,7 @@ const Sidebar = ({
               setFolderFiles={setFolderFiles}
               setReplaceFiles={setReplaceFiles}
             />
+            <SidebarAddFolder folderId={folderId} setFolders={setFolders} />
           </List>
         )}
       <Divider />

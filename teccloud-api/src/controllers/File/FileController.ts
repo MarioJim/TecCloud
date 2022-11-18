@@ -224,18 +224,19 @@ class FileController {
         return res.sendStatus(404);
       }
 
-      const files = await user.getFiles({
+      let files = await user.getFiles({
         where: { folderId },
         include: [{ model: User }],
       });
-      if (await folder.isOwnedBy(user)) {
-        res.json(files);
-      } else {
+      const folders = await Folder.findAll({ where: { parentId: folderId } });
+      if (!(await folder.isOwnedBy(user))) {
         const filePermissions = await Promise.all(
           files.map((file) => file.viewableBy(user)),
         );
-        res.json(files.filter((_, i) => filePermissions[i]));
+        files = files.filter((_, i) => filePermissions[i]);
       }
+
+      res.json({ files, folders, parentId: folder.parentId });
     };
   }
 

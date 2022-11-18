@@ -23,18 +23,18 @@ import { Page } from './page';
 import { User } from './user';
 
 User.hasOne(Folder);
-Folder.belongsTo(User);
+Folder.hasOne(User);
 
-Folder.belongsTo(Folder);
-Folder.hasMany(Folder);
+Folder.belongsTo(Folder, { foreignKey: 'parentId', onDelete: 'cascade' });
+Folder.hasMany(Folder, { onDelete: 'cascade' });
 
-Folder.hasMany(File);
-File.belongsTo(Folder);
+Folder.hasMany(File, { onDelete: 'cascade' });
+File.belongsTo(Folder, { onDelete: 'cascade' });
 
 User.belongsToMany(File, { through: FileAccess });
 File.belongsToMany(User, { through: FileAccess });
 
-File.hasMany(Page);
-Page.belongsTo(File);
+File.hasMany(Page, { onDelete: 'cascade' });
+Page.belongsTo(File, { onDelete: 'cascade' });
 
 export { File, FileAccess, Folder, Page, User };

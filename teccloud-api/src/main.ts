@@ -7,6 +7,7 @@ import express from 'express';
 import { sequelize } from './db';
 import { port, websiteServer } from './config';
 import FileRoutes from './controllers/File';
+import FolderRoutes from './controllers/Folder';
 import UserRoutes from './controllers/User';
 
 const app = express();
@@ -17,6 +18,8 @@ app.use(cookieParser());
 
 app.use('/user', UserRoutes);
 app.use('/files', FileRoutes);
+// Folder routes
+app.use('/folder', FolderRoutes);
 
 (async () => {
   await sequelize.sync({ force: true });
