@@ -219,7 +219,7 @@ const Files: AuthenticatedPage = ({ user }) => {
               </Stack>
             </Box>
           )}
-          {/* {folderFiles.length == 0 && folders.length == 0 && (
+          {folderFiles.length == 0 && folders.length == 0 && (
             <>
               <Typography paragraph>
                 Oops... it seems there are no files here :(
@@ -255,7 +255,7 @@ const Files: AuthenticatedPage = ({ user }) => {
                 ownerId={file.file_access.ownerId}
                 currentUser={user}
               />
-            ))} */}
+            ))}
         </Box>
       </Scaffold>
     </Fragment>

@@ -225,7 +225,7 @@ class FileController {
         return res.sendStatus(404);
       }
 
-      let folders = await Folder.findAll({ where: { parentId: folderId } });
+      const folders = await Folder.findAll({ where: { parentId: folderId } });
 
       const files = await user.getFiles({
         where: { folderId },
@@ -252,6 +252,7 @@ class FileController {
 
   public getShared(): RequestHandler {
     return async (req: Request, res: Response) => {
+      console.log('got hereeeeeeeeeeeeeeeeeee');
       const { userId } = req;
 
       const user = await User.findByPk(userId);

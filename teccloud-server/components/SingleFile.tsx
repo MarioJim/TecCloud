@@ -62,7 +62,6 @@ const SingleFile = ({
         spacing={1}
         sx={{ width: 0.4 }}
       >
-        <DeleteFileModal fileName={fileName} originalName={originalName} />
         <ShareDialog
           fileId={fileId}
           folderId={folderId}
