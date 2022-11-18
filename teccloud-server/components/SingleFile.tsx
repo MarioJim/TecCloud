@@ -37,72 +37,71 @@ const SingleFile = ({
   const [currentName, setCurrentName] = useState<string>(originalName);
 
   return (
-  <Card
-    sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'stretch',
-      margin: '8px',
-      width: '270px',
-    }}
-  >
-    {thumbnail ? (
-      <CardMedia
-        component='img'
-        height='180'
-        image={thumbnail}
-        alt={`Thumbnail for file ${originalName}`}
-        sx={{ objectPosition: 'top left' }}
-      />
-    ) : (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: 180,
-          fontSize: '72px',
-        }}
-      >
-        <InsertDriveFileTwoToneIcon fontSize='inherit' color='primary' />
-      </Box>
-    )}
-    <Divider />
-    <Box sx={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
-      <Typography noWrap sx={{ flex: 1, marginLeft: '8px' }}>
-        {currentName}
-      </Typography>
-      <Box sx={{ display: 'flex' }}>
-        <IconButton
-          size='medium'
-          target='_blank'
-          href={`${apiServer}/files/download/${fileName}`}
+    <Card
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        margin: '8px',
+        width: '270px',
+      }}
+    >
+      {thumbnail ? (
+        <CardMedia
+          component='img'
+          height='180'
+          image={thumbnail}
+          alt={`Thumbnail for file ${originalName}`}
+          sx={{ objectPosition: 'top left' }}
+        />
+      ) : (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: 180,
+            fontSize: '72px',
+          }}
         >
-          <DownloadForOfflineIcon fontSize='inherit' />
-        </IconButton>
-        {shareProps && (
-          <ShareDialog
-            fileId={shareProps.fileId}
-            folderId={shareProps.folderId}
-            fileName={fileName}
-            originalName={originalName}
-            accessByLink={shareProps.accessByLink}
-            users={shareProps.users}
-            ownerId={shareProps.ownerId}
-            currentUser={shareProps.currentUser}
-          />
-        )}
-        {shareProps && shareProps.ownerId === shareProps.currentUser.id && (
+          <InsertDriveFileTwoToneIcon fontSize='inherit' color='primary' />
+        </Box>
+      )}
+      <Divider />
+      <Box sx={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
+        <Typography noWrap sx={{ flex: 1, marginLeft: '8px' }}>
+          {currentName}
+        </Typography>
+        <Box sx={{ display: 'flex' }}>
+          <IconButton
+            size='medium'
+            target='_blank'
+            href={`${apiServer}/files/download/${fileName}`}
+          >
+            <DownloadForOfflineIcon fontSize='inherit' />
+          </IconButton>
+          {shareProps && (
+            <ShareDialog
+              fileName={fileName}
+              originalName={originalName}
+              accessByLink={shareProps.accessByLink}
+              users={shareProps.users}
+              ownerId={shareProps.ownerId}
+              currentUser={shareProps.currentUser}
+            />
+          )}
+          {shareProps && shareProps.ownerId === shareProps.currentUser.id && (
             <FileModal
               folderId={shareProps.folderId}
               fileName={fileName}
               originalName={currentName}
               setCurrentName={setCurrentName}
             />
-        )}
+          )}
+        </Box>
       </Box>
-    </Box>
-  </Card>
-);
+    </Card>
+  );
+};
 
 export default SingleFile;

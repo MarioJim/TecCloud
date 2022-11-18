@@ -1,9 +1,6 @@
 import { useState } from 'react';
-import { apiServer } from '../config';
 import axios from 'axios';
 import Box from '@mui/material/Box';
-import Fade from '@mui/material/Fade';
-import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -11,6 +8,11 @@ import Collapse from '@mui/material/Collapse';
 import AlertTitle from '@mui/material/AlertTitle';
 import Alert from '@mui/material/Alert';
 import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
+import Dialog from '@mui/material/Dialog';
+import RenameIcon from '@mui/icons-material/DriveFileRenameOutlineRounded';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { apiServer } from '../config';
 
 interface FolderModalProps {
   folderId: number;
@@ -39,7 +41,7 @@ const FolderModal = ({
   const handleCloseDelete = () => setTimeout(() => setOpenDelete(false), 200);
   const [error, setError] = useState<boolean>(false);
 
-  const renameFolder = async (e: React.FormEvent): Promise<any> => {
+  const renameFolder = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     const target = e.target as typeof e.target & {
       newFolderName: { value: string };
@@ -88,128 +90,111 @@ const FolderModal = ({
 
   return (
     <>
-      <Button
-        variant='contained'
-        color='warning'
-        onClick={() => setOpenRename(true)}
+      <IconButton size='medium' onClick={() => setOpenRename(true)}>
+        <RenameIcon fontSize='inherit' />
+      </IconButton>
+      <Dialog
+        open={openRename}
+        onClose={handleCloseRename}
+        fullWidth
+        maxWidth='sm'
       >
-        Rename
-      </Button>
-      <Modal open={openRename} onClose={handleCloseRename}>
-        <Fade in={openRename} timeout={200}>
-          <Box
-            component='form'
-            onSubmit={renameFolder}
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 400,
-              bgcolor: 'background.paper',
-              border: '5px solid blue',
-              boxShadow: 24,
-              p: 4,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <Typography variant='h5' textAlign='center' fontWeight='bold'>
-              What will be the new name?
-            </Typography>
-            <TextField
-              required
-              fullWidth
-              name='newFolderName'
-              id='newFolderName'
-              sx={{ m: 2 }}
-            />
-            <Box sx={{ width: '100%' }}>
-              <Collapse in={error}>
-                <Alert severity='error' sx={{ mb: 2 }}>
-                  <AlertTitle>Error</AlertTitle>
-                  File name already exists in this folder!
-                </Alert>
-              </Collapse>
-            </Box>
-            <Stack
-              direction='row'
-              justifyContent='flex-start'
-              alignItems='center'
-              spacing={1}
-            >
-              <Button
-                variant='contained'
-                color='primary'
-                onClick={handleCloseRename}
-              >
-                Go back
-              </Button>
-              <Button variant='contained' color='warning' type='submit'>
-                Rename
-              </Button>
-            </Stack>
+        <Box
+          component='form'
+          onSubmit={renameFolder}
+          sx={{
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Typography variant='h5' textAlign='center' fontWeight='bold'>
+            What will be the new name?
+          </Typography>
+          <TextField
+            required
+            fullWidth
+            name='newFolderName'
+            id='newFolderName'
+            sx={{ m: 2 }}
+          />
+          <Box sx={{ width: '100%' }}>
+            <Collapse in={error}>
+              <Alert severity='error' sx={{ mb: 2 }}>
+                <AlertTitle>Error</AlertTitle>
+                File name already exists in this folder!
+              </Alert>
+            </Collapse>
           </Box>
-        </Fade>
-      </Modal>
-      <Button
-        variant='contained'
-        color='error'
-        onClick={() => setOpenDelete(true)}
+          <Stack
+            direction='row'
+            justifyContent='flex-start'
+            alignItems='center'
+            spacing={1}
+          >
+            <Button
+              variant='contained'
+              color='primary'
+              onClick={handleCloseRename}
+            >
+              Go back
+            </Button>
+            <Button variant='contained' color='warning' type='submit'>
+              Rename
+            </Button>
+          </Stack>
+        </Box>
+      </Dialog>
+
+      <IconButton size='medium' onClick={() => setOpenDelete(true)}>
+        <DeleteIcon fontSize='inherit' />
+      </IconButton>
+      <Dialog
+        open={openDelete}
+        onClose={handleCloseDelete}
+        fullWidth
+        maxWidth='sm'
       >
-        Delete
-      </Button>
-      <Modal open={openDelete} onClose={handleCloseDelete}>
-        <Fade in={openDelete}>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 400,
-              bgcolor: 'background.paper',
-              border: '5px solid red',
-              boxShadow: 24,
-              p: 4,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
+        <Box
+          sx={{
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Typography variant='h5' textAlign='center' fontWeight='bold'>
+            Are you sure you want to permanently delete this folder and its
+            contents?
+          </Typography>
+          <Typography
+            variant='h5'
+            textAlign='center'
+            fontStyle='italic'
+            sx={{ my: 4 }}
           >
-            <Typography variant='h5' textAlign='center' fontWeight='bold'>
-              Are you sure you want to permanently delete this folder and its
-              contents?
-            </Typography>
-            <Typography
-              variant='h5'
-              textAlign='center'
-              fontStyle='italic'
-              sx={{ my: 4 }}
+            {folderName}
+          </Typography>
+          <Stack
+            direction='row'
+            justifyContent='flex-start'
+            alignItems='center'
+            spacing={1}
+          >
+            <Button
+              variant='contained'
+              color='primary'
+              onClick={handleCloseDelete}
             >
-              {folderName}
-            </Typography>
-            <Stack
-              direction='row'
-              justifyContent='flex-start'
-              alignItems='center'
-              spacing={1}
-            >
-              <Button
-                variant='contained'
-                color='primary'
-                onClick={handleCloseDelete}
-              >
-                No, go back
-              </Button>
-              <Button variant='contained' color='error' onClick={deleteFolder}>
-                Yes, delete now
-              </Button>
-            </Stack>
-          </Box>
-        </Fade>
-      </Modal>
+              No, go back
+            </Button>
+            <Button variant='contained' color='error' onClick={deleteFolder}>
+              Yes, delete now
+            </Button>
+          </Stack>
+        </Box>
+      </Dialog>
     </>
   );
 };

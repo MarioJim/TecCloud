@@ -183,6 +183,48 @@ const Files: AuthenticatedPage = ({ user }) => {
       >
         <UploadModal open={isDragActive} numberFiles={numberDraggedFiles} />
         <UploadStatusDialog status={uploadStatus} setStatus={setUploadStatus} />
+        {replaceFiles.map((file) => (
+          <ReplaceFileModal
+            key={file.replace.name}
+            folderId={folderId}
+            prevFileName={file.prevFileName}
+            newFile={file.replace}
+            removeFile={(fileOriginalName: string) => {
+              setReplaceFiles(
+                replaceFiles.filter(
+                  (replaceFile) =>
+                    replaceFile.replace.name !== fileOriginalName,
+                ),
+              );
+            }}
+            setFolderFiles={(files: any[]) => {
+              setFolderFiles([...files]);
+            }}
+          />
+        ))}
+        {parentId && (
+          <Box
+            sx={{
+              height: '54px',
+              alignItems: 'center',
+              margin: '5px',
+            }}
+          >
+            <Stack
+              direction='row'
+              justifyContent='flex-start'
+              alignItems='center'
+              spacing={1}
+            >
+              <IconButton size='large' href={`/files/${parentId}`}>
+                <ArrowBackIcon fontSize='inherit' />
+              </IconButton>
+              <Typography noWrap sx={{ width: 0.6 }}>
+                Go back
+              </Typography>
+            </Stack>
+          </Box>
+        )}
         <Box
           sx={{
             maxWidth: 'calc(100vw - 300px)',
@@ -191,66 +233,20 @@ const Files: AuthenticatedPage = ({ user }) => {
           }}
           {...getRootProps()}
         >
-          {replaceFiles.length > 0 ? (
-            replaceFiles.map((file) => (
-              <ReplaceFileModal
-                key={file.replace.name}
-                folderId={folderId}
-                prevFileName={file.prevFileName}
-                newFile={file.replace}
-                removeFile={(fileOriginalName: string) => {
-                  setReplaceFiles(
-                    replaceFiles.filter(
-                      (replaceFile) =>
-                        replaceFile.replace.name !== fileOriginalName,
-                    ),
-                  );
-                }}
-                setFolderFiles={(files: any[]) => {
-                  setFolderFiles([...files]);
-                }}
-              />
-            ))
-          ) : (
-            <></>
-          )}
-          {parentId && (
-            <Box
-              sx={{
-                height: '54px',
-                alignItems: 'center',
-                margin: '5px',
-              }}
-            >
-              <Stack
-                direction='row'
-                justifyContent='flex-start'
-                alignItems='center'
-                spacing={1}
-              >
-                <IconButton size='large' href={`/files/${parentId}`}>
-                  <ArrowBackIcon fontSize='inherit' />
-                </IconButton>
-                <Typography fontFamily={'Verdana'} noWrap sx={{ width: 0.6 }}>
-                  Go back
-                </Typography>
-              </Stack>
-            </Box>
-          )}
-          {folderFiles.length == 0 && folders.length == 0 && (
+          {folderFiles.length === 0 && folders.length === 0 && !searchQuery && (
             <>
-              <Typography paragraph>
-                {searchQuery
-                  ? 'Oops... it seems your search returned no files :('
-                  : 'Oops... it seems there are no files here :('}
+              <Typography paragraph flex='0 0 100%'>
+                Oops... it seems there are no files here :(
               </Typography>
+              <br />
+              <Typography paragraph>Drop a file here to upload it!</Typography>
               <input {...getInputProps()} />
-              {!searchQuery && (
-                <Typography paragraph>
-                  Drop a file here to upload it!
-                </Typography>
-              )}
             </>
+          )}
+          {folderFiles.length === 0 && folders.length === 0 && searchQuery && (
+            <Typography paragraph>
+              Oops... it seems your search returned no files :(
+            </Typography>
           )}
           {folders.length > 0 &&
             !searchQuery &&

@@ -8,6 +8,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import ShareIcon from '@mui/icons-material/Share';
 import ShareWithBar from './ShareWithBar';
 import UserAccessList from './UserAccessList';
 import GeneralAccessSelect from './GeneralAccessSelect';
@@ -36,9 +38,9 @@ const ShareDialog = ({
 
   return (
     <>
-      <Button variant='contained' color='info' onClick={() => setOpen(true)}>
-        {ownerId === currentUser.id ? <>Share</> : <>Shared with</>}
-      </Button>
+      <IconButton size='medium' onClick={() => setOpen(true)}>
+        <ShareIcon fontSize='inherit' />
+      </IconButton>
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth='sm'>
         <DialogTitle sx={{ fontWeight: 'bold' }}>
           {ownerId == currentUser.id ? (
