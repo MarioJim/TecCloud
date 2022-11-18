@@ -17,6 +17,9 @@ import UploadStatusDialog, {
 import SingleFile from '../../components/SingleFile';
 import SingleFolder from '../../components/SingleFolder';
 import ReplaceFileModal from '../../components/ReplaceFileModal';
+import DeleteFileModal, {
+  DeletingFile,
+} from '../../components/DeleteFileModal';
 import { apiServer } from '../../config';
 
 export const getServerSideProps: GetServerSideUser = async (ctx) => {
@@ -58,6 +61,7 @@ const Files: AuthenticatedPage = ({ user }) => {
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     status: 'initial',
   });
+  const [deletingFile, setDeletingFile] = useState<DeletingFile | null>(null);
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -163,6 +167,7 @@ const Files: AuthenticatedPage = ({ user }) => {
       >
         <UploadModal open={isDragActive} numberFiles={numberDraggedFiles} />
         <UploadStatusDialog status={uploadStatus} setStatus={setUploadStatus} />
+        <DeleteFileModal file={deletingFile} setFile={setDeletingFile} />
         <Box
           sx={{
             maxWidth: 'calc(100vw - 300px)',
@@ -254,6 +259,7 @@ const Files: AuthenticatedPage = ({ user }) => {
                 users={file.users}
                 ownerId={file.file_access.ownerId}
                 currentUser={user}
+                setAsDeletingFile={setDeletingFile}
               />
             ))}
         </Box>

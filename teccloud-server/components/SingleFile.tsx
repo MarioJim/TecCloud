@@ -1,12 +1,14 @@
-import Box from '@mui/material/Box';
 import type { User } from '../types';
+import { Dispatch, SetStateAction } from 'react';
+import Box from '@mui/material/Box';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import DeleteFileModal from './DeleteFileModal';
-import { apiServer } from '../config';
+import Button from '@mui/material/Button';
 import ShareDialog from './ShareDialog';
+import { DeletingFile } from './DeleteFileModal';
+import { apiServer } from '../config';
 
 interface SingleFileProps {
   fileId: number;
@@ -17,6 +19,7 @@ interface SingleFileProps {
   users: User[];
   ownerId: number;
   currentUser: User;
+  setAsDeletingFile: Dispatch<SetStateAction<DeletingFile | null>>;
 }
 
 const SingleFile = ({
@@ -28,6 +31,7 @@ const SingleFile = ({
   users,
   ownerId,
   currentUser,
+  setAsDeletingFile,
 }: SingleFileProps) => (
   <Box
     sx={{
@@ -72,10 +76,14 @@ const SingleFile = ({
           ownerId={ownerId}
           currentUser={currentUser}
         />
-        {ownerId === currentUser.id ? (
-          <DeleteFileModal fileName={fileName} originalName={originalName} />
-        ) : (
-          <></>
+        {ownerId === currentUser.id && (
+          <Button
+            variant='contained'
+            color='error'
+            onClick={() => setAsDeletingFile({ fileName, originalName })}
+          >
+            Delete
+          </Button>
         )}
       </Stack>
     </Stack>
