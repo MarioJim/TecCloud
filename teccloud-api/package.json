@@ -3,8 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon --watch src --exec 'yarn start'",
-    "dev-win": "nodemon --watch src --exec yarn start",
+    "dev": "nodemon --watch src --exec yarn start",
     "start": "ts-node src/main.ts",
     "typecheck": "tsc --noEmit"
   },
