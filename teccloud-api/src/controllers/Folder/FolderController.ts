@@ -1,7 +1,5 @@
-import fsPromises from 'fs/promises';
 import { Response, RequestHandler, Request } from 'express';
-import { File, Folder, User, sequelize } from '../../db';
-import { get_file_server_path } from '../../utils/files';
+import { Folder, User, sequelize, File, PagesOnAFile } from '../../db';
 
 class FolderController {
   public create(): RequestHandler {
@@ -44,6 +42,42 @@ class FolderController {
         message: 'Folder created successfully.',
         folder: folder,
       });
+    };
+  }
+
+  public searchInFolder(): RequestHandler {
+    return async (req: Request, res: Response) => {
+      const { folderId } = req.params;
+      const { q } = req.query;
+      const { userId } = req;
+
+      const folder = await Folder.findByPk(folderId);
+      const user = await User.findByPk(userId);
+      if (!folder || !user || !q || typeof q !== 'string') {
+        return res.sendStatus(404);
+      }
+
+      let files = await File.findAll({
+        where: { folderId },
+        include: [{ association: PagesOnAFile, as: 'pages' }],
+      });
+      if (!(await folder.isOwnedBy(user))) {
+        const filePermissions = await Promise.all(
+          files.map((file) => file.viewableBy(user)),
+        );
+        files = files.filter((_, i) => filePermissions[i]);
+      }
+
+      const regex = new RegExp(q, 'i');
+      const pages = files
+        .flatMap((file: any) =>
+          file.pages.map((page: any) => ({
+            ...page.dataValues,
+            file: file.dataValues,
+          })),
+        )
+        .filter((page) => ((page.content || '') as string).match(regex));
+      res.json(pages);
     };
   }
 
@@ -107,7 +141,7 @@ class FolderController {
         });
       }
 
-      const folder = await Folder.findOne({ where: { id: folderId } });
+      const folder = await Folder.findByPk(folderId);
       if (!folder) {
         return res.status(404).json({
           success: false,
@@ -124,8 +158,13 @@ class FolderController {
       }
 
       try {
-        let folder = await Folder.findByPk(folderId);
-        folder?.destroy();
+        await folder.deleteOnServer();
+      } catch (err) {
+        console.error(err);
+      }
+
+      try {
+        folder.destroy();
 
         res.status(200).send({
           success: true,

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "nodemon --watch src --exec ts-node src/main.ts",
+    "start": "pm2-runtime dist/main.js",
     "build": "tsc --outDir dist/",
     "typecheck": "tsc --noEmit --strict"
   },

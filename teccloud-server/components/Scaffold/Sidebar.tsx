@@ -69,14 +69,6 @@ const Sidebar = ({
       </List>
       <Divider />
       <List>
-        <SidebarItem
-          path='/settings'
-          title='Settings'
-          icon={<SettingsIcon />}
-        />
-      </List>
-      <Divider />
-      <List>
         <SidebarLogout />
       </List>
     </Box>

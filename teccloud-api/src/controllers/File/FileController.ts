@@ -103,7 +103,13 @@ class FileController {
           res.status(201).json({
             success: true,
             message: 'Files uploaded successfully',
-            files: await user.getFiles({ include: [{ model: User }] }),
+            files: await user.getFiles({
+              where: { folderId },
+              include: [
+                { model: User },
+                { association: PagesOnAFile, as: 'pages' },
+              ],
+            }),
           });
         } catch (e) {
           res.status(500).json({
@@ -298,7 +304,7 @@ class FileController {
 
       const files = await user.getFiles({
         where: { '$file_access.ownerId$': { [Op.ne]: userId } },
-        include: [{ model: User }],
+        include: [{ model: User }, { association: PagesOnAFile, as: 'pages' }],
       });
 
       res.json(files);
@@ -355,39 +361,6 @@ class FileController {
     };
   }
 
-  public searchInFolder(): RequestHandler {
-    return async (req: Request, res: Response) => {
-      const { folderId } = req.params;
-      const { q } = req.query;
-      const { userId } = req;
-
-      const folder = await Folder.findByPk(folderId);
-      const user = await User.findByPk(userId);
-      if (!folder || !user || !q || typeof q !== 'string') {
-        return res.sendStatus(404);
-      }
-
-      let files = await File.findAll({
-        where: { folderId },
-        include: [{ association: PagesOnAFile, as: 'pages' }],
-      });
-      if (!(await folder.isOwnedBy(user))) {
-        const filePermissions = await Promise.all(
-          files.map((file) => file.viewableBy(user)),
-        );
-        files = files.filter((_, i) => filePermissions[i]);
-      } else {
-      }
-
-      const pages = files
-        .flatMap((file) =>
-          (file as any).pages.map((page: any) => ({ ...page, file })),
-        )
-        .filter((page) => (page.content as string).match(q));
-      res.json(pages);
-    };
-  }
-
   public delete(): RequestHandler {
     return async (req: Request, res: Response) => {
       const { fileName } = req.params;
@@ -401,18 +374,19 @@ class FileController {
         return res.sendStatus(404);
       }
 
-      const pages = await Page.findAll({ where: { fileId: fileInfo.id } });
-
       const user = await User.findByPk(userId);
       if (!(user && (await fileInfo.ownedBy(user)))) {
         return res.sendStatus(401);
       }
 
-      const fileInServer = get_file_server_path(fileName);
       try {
-        await fsPromises.unlink(fileInServer);
-        await fileInfo.destroy();
+        await fileInfo.deleteOnServer();
+      } catch (err) {
+        console.error(err);
+      }
 
+      try {
+        await fileInfo.destroy();
         res.status(200).send({
           message: 'File deleted.',
         });
@@ -420,22 +394,6 @@ class FileController {
         res.status(500).send({
           message: 'Could not delete the file.\n' + err,
         });
-      }
-
-      try {
-        await Promise.allSettled(
-          pages.map(async (page) => {
-            if (page.thumbnailPath) {
-              const thumbnailInServer = get_file_server_path(
-                page.thumbnailPath,
-              );
-              await fsPromises.unlink(thumbnailInServer);
-              await page.destroy();
-            }
-          }),
-        );
-      } catch (err) {
-        console.error(err);
       }
     };
   }

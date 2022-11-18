@@ -15,6 +15,7 @@ import UploadStatusDialog, {
 } from '../../components/UploadStatusDialog';
 import SingleFile from '../../components/SingleFile';
 import SingleFolder from '../../components/SingleFolder';
+import SinglePage from '../../components/SinglePage';
 import ReplaceFileModal from '../../components/ReplaceFileModal';
 import { apiServer } from '../../config';
 import uploadCallback from '../../lib/uploadCallback';
@@ -52,6 +53,16 @@ const thumbnailFromFileInfo = (file: any): string | undefined => {
   return undefined;
 };
 
+const thumbnailFromPage = (page: any): string | undefined => {
+  if (page.file.fileType.startsWith('image/')) {
+    return `${apiServer}/files/download/${page.file.fileName}`;
+  }
+  if (page.thumbnailPath) {
+    return `${apiServer}/files/thumbnail/${page.thumbnailPath}`;
+  }
+  return undefined;
+};
+
 const Files: AuthenticatedPage = ({ user }) => {
   const router = useRouter();
   const { folderId: maybeFolderId } = router.query;
@@ -67,6 +78,7 @@ const Files: AuthenticatedPage = ({ user }) => {
   const [folderFiles, setFolderFiles] = useState<any[]>([]);
   const [replaceFiles, setReplaceFiles] = useState<any[]>([]);
   const [folders, setFolders] = useState<any[]>([]);
+  const [pages, setPages] = useState<any[]>([]);
   const [parentId, setParentId] = useState<any>();
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     status: 'initial',
@@ -74,18 +86,24 @@ const Files: AuthenticatedPage = ({ user }) => {
 
   useEffect(() => {
     const fetchFiles = async () => {
-      let filesUrl = `${apiServer}/files/${folderId}`;
       if (searchQuery) {
-        filesUrl += `?q=${searchQuery}`;
+        const pagesResponse = await fetch(
+          `${apiServer}/folder/search/${folderId}?q=${searchQuery}`,
+          {
+            credentials: 'include',
+          },
+        );
+        const pagesJson = await pagesResponse.json();
+        setPages(pagesJson);
+      } else {
+        const filesResponse = await fetch(`${apiServer}/files/${folderId}`, {
+          credentials: 'include',
+        });
+        const filesJson = await filesResponse.json();
+        setFolderFiles(filesJson.files);
+        setFolders(filesJson.folders);
+        setParentId(filesJson.parentId);
       }
-      const filesResponse = await fetch(filesUrl, {
-        method: 'get',
-        credentials: 'include',
-      });
-      const filesJson = await filesResponse.json();
-      setFolderFiles(filesJson.files);
-      setFolders(filesJson.folders);
-      setParentId(filesJson.parentId);
     };
 
     fetchFiles().catch(console.error);
@@ -130,7 +148,11 @@ const Files: AuthenticatedPage = ({ user }) => {
           setFolders((prev) => [...prev, folder]);
         }}
         onSearchQueryChanged={(query) => {
-          console.log(`Should search for ${query} in folder ${folderId}`);
+          if (query) {
+            router.push(`/files/${folderId}?q=${encodeURIComponent(query)}`);
+          } else {
+            router.push(`/files/${folderId}`);
+          }
         }}
       >
         <UploadModal open={isDragActive} numberFiles={numberDraggedFiles} />
@@ -175,7 +197,7 @@ const Files: AuthenticatedPage = ({ user }) => {
             flexWrap: 'wrap',
           }}
         >
-          {folderFiles.length === 0 && folders.length === 0 && !searchQuery && (
+          {!searchQuery && folderFiles.length === 0 && folders.length === 0 && (
             <>
               <Typography paragraph flex='0 0 100%'>
                 {' '}
@@ -187,7 +209,7 @@ const Files: AuthenticatedPage = ({ user }) => {
               <Typography paragraph>Drop a file here to upload it!</Typography>
             </>
           )}
-          {folderFiles.length === 0 && folders.length === 0 && searchQuery && (
+          {searchQuery && pages.length === 0 && (
             <Typography paragraph>
               Oops... it seems your search returned no files :(
             </Typography>
@@ -225,14 +247,15 @@ const Files: AuthenticatedPage = ({ user }) => {
                 thumbnail={thumbnailFromFileInfo(file)}
               />
             ))}
-          {folderFiles.length > 0 &&
+          {pages.length > 0 &&
             searchQuery &&
-            folderFiles.map((page) => (
-              <SingleFile
+            pages.map((page) => (
+              <SinglePage
                 key={`${page.file.id}_p${page.number}`}
                 fileName={page.file.fileName}
                 originalName={page.file.originalName}
-                thumbnail={page.thumbnailPath}
+                thumbnail={thumbnailFromPage(page)}
+                pageNum={page.number}
               />
             ))}
         </Box>

@@ -5,6 +5,8 @@ import {
   InferAttributes,
   InferCreationAttributes,
 } from 'sequelize';
+import fs from 'fs/promises';
+import { get_file_server_path } from '../utils/files';
 import { sequelize, File } from './index';
 
 export class Page extends Model<
@@ -16,6 +18,13 @@ export class Page extends Model<
   declare number: number;
   declare thumbnailPath: string;
   declare content: string;
+
+  async deleteOnServer(): Promise<void> {
+    if (this.thumbnailPath) {
+      const path = get_file_server_path(this.thumbnailPath);
+      await fs.unlink(path);
+    }
+  }
 }
 
 Page.init(
@@ -43,5 +52,6 @@ Page.init(
   {
     sequelize,
     modelName: 'pages',
+    timestamps: false,
   },
 );
